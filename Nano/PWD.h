@@ -57,17 +57,17 @@ namespace Nano{
                 if(P::pinNumber == 5){
                     switch(mode){
                         case OutMode::INVERSION:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0A0);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0B0);
                         case OutMode::NORMAL:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0A1);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0B1);
                     }
                 }
                 if(P::pinNumber == 6){
                     switch(mode){
                         case OutMode::INVERSION:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0B0);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0A0);
                         case OutMode::NORMAL:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0B1);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0A1);
                     }
                 }
             }
@@ -85,7 +85,7 @@ namespace Nano{
                     return;
                 if (P::pinNumber == 6)
                     reference(Registers::R_OCR0A)= static_cast<uint8_t>((per*255)/100);
-                if (P::pinNumber == 6)
+                if (P::pinNumber == 5)
                     reference(Registers::R_OCR0B)= static_cast<uint8_t>((per*255)/100);
             }
             static inline void setDefaultSettings(){
