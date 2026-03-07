@@ -1,58 +1,23 @@
 #ifndef PWD_H
 #define PWD_H
 #include <inttypes.h>
-#include <Nano.h>
+#include <Timer0.h>
 #include <Base.h>
+#include <Nano.h>
 namespace Nano{
-    enum class Prescaling{
-        NoSource,
-        _1,
-        _8,
-        _64,
-        _256,
-        _1024,
-        ExternalClockFaling,
-        ExternalClockRising
-    };
     template <class P>
-    class PWD : private Base{
+    class PWD : private Timer0<0>{
         enum class OutMode{
             NORMAL,
             INVERSION
         };
-        enum class PWDMode{
-            FAST,
-            PHASE_CORRECT
-        };
+        // enum class PWDMode{
+        //     NORMAL,
+        //     CTC,
+        //     PWD_FAST,
+        //     PWD_PHASE_CORRECT
+        // };
         private:
-            static inline void setPrescaling(Prescaling m){
-                switch(m){
-                    case Prescaling::NoSource:
-                        reference(Registers::R_TCCR0B)|=0;
-                        break;
-                    case Prescaling::_1:
-                        reference(Registers::R_TCCR0B)|=1;
-                        break;
-                    case Prescaling::_8:
-                        reference(Registers::R_TCCR0B)|=2;
-                        break;
-                    case Prescaling::_64:
-                        reference(Registers::R_TCCR0B)|=3;
-                        break;
-                    case Prescaling::_256:
-                        reference(Registers::R_TCCR0B)|=4;
-                        break;
-                    case Prescaling::_1024:
-                        reference(Registers::R_TCCR0B)|=5;
-                        break;
-                    case Prescaling::ExternalClockFaling:
-                        reference(Registers::R_TCCR0B)|=6;
-                        break;
-                    case Prescaling::ExternalClockRising:
-                        reference(Registers::R_TCCR0B)|=7;
-                        break;
-                };
-            }
             static inline void setOutMode(OutMode mode){
                 if(P::pinNumber == 5){
                     switch(mode){
@@ -71,14 +36,14 @@ namespace Nano{
                     }
                 }
             }
-            static inline void setPWDMode(PWDMode mode){
-                switch(mode){
-                    case PWDMode::FAST:
-                        reference(Registers::R_TCCR0A)|=(1<<WGM00);
-                    case PWDMode::PHASE_CORRECT:
-                        reference(Registers::R_TCCR0A)|=(1<<WGM01);
-                }
-            }
+        //     static inline void setPWDMode(PWDMode mode){
+        //         switch(mode){
+        //             case PWDMode::FAST:
+        //                 reference(Registers::R_TCCR0A)|=(1<<WGM00);
+        //             case PWDMode::PHASE_CORRECT:
+        //                 reference(Registers::R_TCCR0A)|=(1<<WGM01);
+        //         }
+        //     }
         public:
             static inline void setDirtyPercent(uint8_t per){
                 if ((per < 0)||(per>100))
@@ -92,7 +57,7 @@ namespace Nano{
                 P::setMode(P::Direction::OUTPUT);
                 setOutMode(OutMode::NORMAL);
                 setPWDMode(PWDMode::FAST);
-                setPrescaling(Prescaling::_64);//1ms for 16MHz
+                setPrescaling(Nano::Prescaling::_64);//1ms for 16MHz
             }
     };
     using PWDD5 = PWD<Nano::PinD5>;

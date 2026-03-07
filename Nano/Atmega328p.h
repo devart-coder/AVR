@@ -44,7 +44,6 @@ namespace Atmega328p {
         R_DIDR1=0x7F,
         R_DIDR0=0x7E,
 
-        R_ADMUX=0x7C,
         R_ADCSRB=0x7B,
         R_ADCSRA=0x7A,
         R_ADCH=0x79,

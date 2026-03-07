@@ -3,7 +3,7 @@
 #include <inttypes.h>
 class Base
 {
-public:
+protected:
     static volatile uint8_t& reference(uint16_t addr);
 };
 
