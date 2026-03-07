@@ -1,0 +1,3 @@
+/mnt/development/Cpp/AVR/Nano/build/AVR-Debug/CMakeFiles/Nano.dir
+/mnt/development/Cpp/AVR/Nano/build/AVR-Debug/CMakeFiles/edit_cache.dir
+/mnt/development/Cpp/AVR/Nano/build/AVR-Debug/CMakeFiles/rebuild_cache.dir

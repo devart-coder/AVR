@@ -1,0 +1,10 @@
+#ifndef BASE_H
+#define BASE_H
+#include <inttypes.h>
+class Base
+{
+public:
+    static volatile uint8_t& reference(uint16_t addr);
+};
+
+#endif // BASE_H

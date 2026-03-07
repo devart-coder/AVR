@@ -1,0 +1,2 @@
+/bin/avr-ar qc libNano.a CMakeFiles/Nano.dir/atmega328p.cpp.o
+/bin/avr-ranlib libNano.a

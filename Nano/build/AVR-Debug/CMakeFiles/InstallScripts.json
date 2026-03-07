@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/mnt/development/Cpp/AVR/Nano/build/AVR-Debug/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
