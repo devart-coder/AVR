@@ -30,7 +30,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND avr-objcopy -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex)
 
 add_custom_target(upload
-    COMMAND avrdude -c arduino -p m328p -P /dev/ttyUSB1 -b 115200 -U flash:w:${PROJECT_NAME}.hex:i
+    COMMAND avrdude -c arduino -p m328p -P /dev/ttyUSB* -b 115200 -U flash:w:${PROJECT_NAME}.hex:i
     DEPENDS ${PROJECT_NAME}
     COMMENT "Uploading to Arduino Nano..."
 )
