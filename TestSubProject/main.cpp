@@ -6,13 +6,15 @@ using namespace Nano;
 static volatile uint8_t counter=0b11110000;
 ISR(USART_RX_vect) {
     uint8_t r = UART::receive();
-        if(r == '1' )
+        if(r == '1' ){
             PinD4::toggle();
+            UART::print("Result: ");
+            UART::println(123);
+        }
         if(r == '2' )
             PinD5::toggle();
         if(r == '3' )
             PinD6::toggle();
-        UART::println("Hello");
 }
 int main()
 {
