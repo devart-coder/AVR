@@ -7,8 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(Nano STATIC
     Atmega328p.h
     Nano.h
-    Pin.h
-    Pin.cpp
+    Pin.h Pin.cpp
     Port.h
     Bus.h
 
@@ -20,3 +19,4 @@ add_library(Nano STATIC
 
 )
 target_include_directories(Nano PUBLIC .)
+target_link_libraries(Nano PUBLIC Utils)

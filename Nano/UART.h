@@ -2,7 +2,7 @@
 #define UART_H
 #include <Nano.h>
 #include <Base.h>
-
+#include "conversion.h"
 class UART : Base{
     public:
     static inline void setBaudRate(unsigned int speed){

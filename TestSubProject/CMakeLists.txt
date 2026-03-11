@@ -24,7 +24,7 @@ add_link_options(-mmcu=${MCU})
 add_link_options(-Wl,--gc-sections)
 
 add_executable(TestSubProject main.cpp)
-target_link_libraries(TestSubProject PUBLIC Nano)
+target_link_libraries(TestSubProject PUBLIC Nano Utils)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND avr-objcopy -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex)
