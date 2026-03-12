@@ -1,5 +1,5 @@
-#ifndef CONVERSION_H
-#define CONVERSION_H
+#ifndef UTILS_H
+#define UTILS_H
 
 namespace Utils{
     namespace Conversions {
@@ -19,4 +19,4 @@ namespace Utils{
         }
     }
 }
-#endif // CONVERSION_H
+#endif // UTILS_H

@@ -7,7 +7,7 @@ int main()
 {
     UART::setDefaultSettings();
     UART::setReceiveCallback([](){
-        uint8_t r = UART::receive();
+        char r = UART::receive();
         if(r == '1' ){
             PinD4::toggle();
             UART::print("Result: ");

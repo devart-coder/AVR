@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(Utils STATIC
-  Conversion.cpp
-  Conversion.h
+  Utils.cpp
+  Utils.h
 )
 
 target_include_directories(Utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
