@@ -22,38 +22,41 @@ namespace Utils{
     namespace Templates {
 
         template <typename...>
-        using voidType = void;
+        using void_type = void;
 
         template<bool f, class T = void>
-        struct enableIf{
+        struct enable_if{
         };
 
         template<class T>
-        struct enableIf<true, T>{
+        struct enable_if<true, T>{
             using type = T;
         };
 
         template<bool f, class T = void>
-        using enableIfType = typename enableIf<f,T>::type;
+        using enable_if_t = typename enable_if<f,T>::type;
 
         //PinCheck
         template<class T , class = void>
-        struct isPin{
+        struct is_pin{
             static constexpr bool value = false;
         };
 
         template<class T>
-        struct isPin<T, voidType<decltype(T::pinNumber)>>{
+        struct is_pin<T, void_type<decltype(T::pinNumber)>>{
             static constexpr bool value = true;
         };
-        //pinWithNumber<5>::value
+
+        template<class T>
+        using is_pin_v = typename is_pin<T>::value;
+
         template< class PIN, uint8_t number, class P = void >
-        struct pinWithNumber{
+        struct pin_with_number{
             static constexpr bool value = false;
         };
 
         template< class PIN, uint8_t  number>
-        struct pinWithNumber<PIN, number, enableIfType<PIN::pinNumber == number, PIN> >{
+        struct pin_with_number<PIN, number, enable_if_t<PIN::pinNumber == number, PIN> >{
             static constexpr bool value = true;
         };
     }
