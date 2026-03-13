@@ -16,6 +16,8 @@ add_library(Nano STATIC
     Timer0.h Timer0.cpp
     Base.h Base.cpp
     UART.h
+    ExternalInterrupt.h
+    Callable.h Callable.cpp
 
 )
 target_include_directories(Nano PUBLIC .)

@@ -6,8 +6,8 @@
 #include <Nano.h>
 #include <Utils.h>
 namespace Nano{
-using namespace Utils::Templates;
-template < class P , uint8_t number = P::pinNumber, class T =  enable_if_t<(number == 5)||(number == 6)>>
+    using namespace Utils::Templates;
+    template < class P , uint8_t number = P::pinNumber, class T =  enable_if_t<(number == 5)||(number == 6)>>
     class PWD : private Timer0{
         enum class OutMode{
             NORMAL,

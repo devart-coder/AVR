@@ -3,6 +3,7 @@
 #include <Base.h>
 #include <avr/interrupt.h>
 #include <Nano.h>
+#include <Callable.h>
 namespace Nano {
     enum class Prescaling{
         NoSource=0,
@@ -27,13 +28,10 @@ namespace Nano {
         ALL=7
     };
 
-    // template<uint8_t Number>
-    class Timer0 : protected Base
+    class Timer0 : public Callable, protected Base
     {
         using Handle = void (*)(char);
         static inline Handle callBack = nullptr;
-        using HandleOVF = void (*)();
-        static inline HandleOVF callBackOVF = nullptr;
 
         protected:
         static inline void setPrescaling(Prescaling p){
@@ -79,25 +77,19 @@ public:
     static inline void setCallbackByMatch(Handle handle){
         callBack = handle;
     }
-    static inline void setCallbackByOverFlow(HandleOVF handle){
-        callBackOVF = handle;
-    }
     static void interruptByMatch(char c){
         callBack(c);
     }
-    static void interruptByOverFlow(){
-        callBackOVF();
-    }
 };
 }
-using Clock = Nano::Timer0;
+using SystemClock = Nano::Timer0;
 ISR(TIMER0_COMPA_vect) {
-    Clock::interruptByMatch('A');
+    SystemClock::interruptByMatch('A');
 }
 ISR(TIMER0_COMPB_vect) {
-    Clock::interruptByMatch('B');
+    SystemClock::interruptByMatch('B');
 }
 ISR(TIMER0_OVF_vect) {
-    Clock::interruptByOverFlow();
+    SystemClock::handle();
 }
 #endif // TIMER__H
