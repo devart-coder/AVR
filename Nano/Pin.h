@@ -7,7 +7,7 @@ template<class PORT, uint8_t BIT>
 class Pin
 {
 public:
-    static constexpr volatile uint8_t pinNumber = BIT;
+    static constexpr uint8_t pinNumber = BIT;
     using portType = PORT;
     enum class Direction:uint8_t{
         INPUT,

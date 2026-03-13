@@ -27,7 +27,7 @@ namespace Nano {
         ALL=7
     };
 
-    template<uint8_t Number>
+    // template<uint8_t Number>
     class Timer0 : protected Base
     {
         using Handle = void (*)(char);
@@ -90,7 +90,7 @@ public:
     }
 };
 }
-using Clock = Nano::Timer0<0>;
+using Clock = Nano::Timer0;
 ISR(TIMER0_COMPA_vect) {
     Clock::interruptByMatch('A');
 }

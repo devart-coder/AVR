@@ -4,19 +4,15 @@
 #include <Timer0.h>
 #include <Base.h>
 #include <Nano.h>
+#include <Utils.h>
 namespace Nano{
-    template <class P>
-    class PWD : private Timer0<0>{
+using namespace Utils::Templates;
+template < class P , uint8_t number = P::pinNumber, class T =  enableIfType<(number == 5)||(number == 6)>>
+    class PWD : private Timer0{
         enum class OutMode{
             NORMAL,
             INVERSION
         };
-        // enum class PWDMode{
-        //     NORMAL,
-        //     CTC,
-        //     PWD_FAST,
-        //     PWD_PHASE_CORRECT
-        // };
         private:
             static inline void setOutMode(OutMode mode){
                 if(P::pinNumber == 5){
@@ -36,14 +32,6 @@ namespace Nano{
                     }
                 }
             }
-        //     static inline void setPWDMode(PWDMode mode){
-        //         switch(mode){
-        //             case PWDMode::FAST:
-        //                 reference(Registers::R_TCCR0A)|=(1<<WGM00);
-        //             case PWDMode::PHASE_CORRECT:
-        //                 reference(Registers::R_TCCR0A)|=(1<<WGM01);
-        //         }
-        //     }
         public:
             static inline void setDirtyPercent(uint8_t per){
                 if ((per < 0)||(per>100))
@@ -56,7 +44,7 @@ namespace Nano{
             static inline void setDefaultSettings(){
                 P::setMode(P::Direction::OUTPUT);
                 setOutMode(OutMode::NORMAL);
-                setPWDMode(PWDMode::FAST);
+                setMode(Mode::PWD_FAST);
                 setPrescaling(Nano::Prescaling::_64);//1ms for 16MHz
             }
     };
