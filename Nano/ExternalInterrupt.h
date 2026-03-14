@@ -52,13 +52,23 @@ namespace Nano {
                 }
             }//INT1
         }
+        static inline void enableInterrupts(){
+            switch(number){
+            case 2:
+                reference(Registers::R_EIMSK)|=(1<<INT0);
+                break;
+            case 3:
+                reference(Registers::R_EIMSK)|=(1<<INT1);
+                break;
+            }
+        }
     public:
         static inline void setDefaultSettings(){
             cli();
             PIN::setMode(PIN::Direction::INPUT);
             PIN::setHigh();
-            setTriggerMode(TriggerMode::ANY_CHANGE);
-            reference(Registers::R_EIMSK)|=(1<<INT0);
+            setTriggerMode(TriggerMode::LOW_LEVEL);
+            enableInterrupts();
             sei();
         }
 
