@@ -10,15 +10,37 @@
 using namespace Utils::Templates;
 template<class ...T>
 class Bus : Base{
-    //Examle: 4,5,6
-    static constexpr uint8_t  mask = ( (1<<T::pinNumber) | ... );
-    static constexpr uint8_t  size = sizeof...(T);
+    static constexpr uint8_t  bitNumber = ( T::pinNumber | ... );
+
+    template<class HEAD, class... TAIL>
+    struct FirstType{
+        using type = HEAD;
+    };
+    using FirstPin = typename FirstType<T...>::type;
+    using FirstPort = typename FirstPin::portType;
+    static constexpr bool  singlePort = ( is_same_v<typename T::portType , FirstPort>  && ... );
+
+    template<class P>
+    static inline void writeBit(bool bit){
+        bit == true ? P::setHigh() : P::setLow();
+    }
     public:
     static inline void write(uint8_t byte){
-        uint8_t portBits = 0;
-        uint8_t i=0;
-        // ( portBits|= ( ((byte >> i++)&1) |...));
+        if constexpr (singlePort){
+            uint8_t portBits = 0;
+            uint8_t index=0;
+            ( portBits|= ( (((byte >> index++)&1) ? T::pinNumber : 0) |...) );
+            reference(FirstPort::port)|= ((~bitNumber)|portBits);
+        }else{
+            uint8_t index = 0 ;
+            (writeBit<T>(((byte>>index++)&0x01)), ...);
+        }
     }
-    //read
+    static inline void setBusMode(){
+
+    }
+    static inline void setBusModeMask(uint8_t mask){
+        reference(Registers::R_DDRD)|= ((~bitNumber)|mask);
+    }
 };
 #endif // BUS_H

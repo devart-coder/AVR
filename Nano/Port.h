@@ -7,10 +7,10 @@ using Atmega328p::Registers;
 
 template<Registers PORT>
 class Port : private Base{
+    public:
         static constexpr uint16_t port = PORT;
         static constexpr uint16_t ddr = static_cast<uint16_t>(PORT)-1;
         static constexpr uint16_t pin = static_cast<uint16_t>(PORT)-2;
-    public:
         static inline void setMode(uint8_t byte){
             reference(ddr)=byte;
         }

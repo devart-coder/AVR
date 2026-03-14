@@ -15,7 +15,7 @@ namespace Nano {
         RISING_EDGE
     };
 
-    template<class PIN, uint8_t number=PIN::pinNumber, class T = enable_if_t<(number == 2) ||( number == 3)> >
+    template<class PIN, uint8_t number=PIN::pinNumber, class T = enable_if_t<(number == (1<<2)) ||( number == (1<<3))> >
     class ExternalInterrupt : public Callable , private Base{
         static inline void setTriggerMode(TriggerMode mode){
             auto eicra = reference(Registers::R_EICRA);
