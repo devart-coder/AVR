@@ -123,5 +123,12 @@ namespace Atmega328p {
         R_DDRB=0x24,
         R_PINB=0x23
     };
+    namespace Bits {
+        enum{
+            CS00 = 0,
+            CS01 = 1,
+            CS02 = 2
+        };
+    }
 }
 #endif // ATMEGA328P_H

@@ -56,7 +56,7 @@ namespace Utils{
         };
 
         template< class PIN, uint8_t  number>
-        struct pin_with_number<PIN, number, enable_if_t<PIN::pinNumber == number, PIN> >{
+        struct pin_with_number<PIN, number, enable_if_t<(PIN::pinNumber == (1<<number))> >{
             static constexpr bool value = true;
         };
 

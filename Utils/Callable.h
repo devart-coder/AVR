@@ -1,13 +1,18 @@
 #ifndef CALLABLE_H
 #define CALLABLE_H
-
+template<class T>
 class Callable
 {
-        using HandleType = void (*)();
+    protected:
+        using HandleType = T;
         static inline HandleType callback = nullptr;
     public:
-        static void setCallback(HandleType f );
-        static void handle();
+        static void setCallback(HandleType f ){
+            callback=f;
+        }
+        static void handle(){
+            callback();
+        }
 };
 
 #endif // CALLABLE_H

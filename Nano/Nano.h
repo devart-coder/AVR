@@ -4,7 +4,10 @@
 #include "../Utils/Pin.h"
 #include "../Utils/Port.h"
 namespace Nano{
+    using Utils::Pin;
+    using Utils::Direction;
     using Atmega328p::Registers;
+
     using PortD = Port<Registers::R_PORTD>;
     using PortC = Port<Registers::R_PORTC>;
     using PortB = Port<Registers::R_PORTB>;

@@ -2,18 +2,30 @@
 #include <ExternalInterrupt.h>
 #include <Delay.h>
 #include <Bus.h>
+#include <Timer0.h>
+// #include <PWD.h>
 using namespace Nano;
-volatile uint8_t counter = 0;
-using B = Bus< PinD2, PinD4, PinD6 >;
+using RGB = Bus< PinD2, PinD4, PinD6, PinD5>;
+using LED = SystemClock;
+static uint32_t counter=0;
 int main()
 {
-    PinD7::setMode(PinD7::Direction::OUTPUT);
-    PinD7::setHigh();
-    // B::setBusDirectionMask(0xff);
-    // B::write(2);
-    for(int i=0; ;++i,i%=8){
-        B::write(i);
-        delayMs(500);
+    RGB::setDirection(0b1001);
+    LED::setDefaultSettings();
+    LED::setCallback([](){
+        ++counter;
+        counter%=800*2;
+    });
+    LED::start();
+    RGB::get<3>::setHigh();
+    for(int i=0; ; ++i, i%=8){
+        if(counter==1000){
+            LED::stop();
+            delayMs(1000);
+            counter=200;
+            LED::start();
+        }
+        RGB::write(counter/200);
     }
     return 0;
 }
