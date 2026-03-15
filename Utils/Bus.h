@@ -33,14 +33,14 @@ class Bus : Base{
     public:
         static inline void write(uint8_t byte){
                 uint8_t index = 0 ;
-            // if constexpr (singlePort){
-                // uint8_t portBits = 0;
-                // portBits|= ( (((byte >> index++)&1) ? T::pinNumber : 0) |...);
-                // portBits|=(1<<5);//FirstPort::read();
-                // FirstPort::write( ~(pinPositions) | portBits );
-            // }else{
+            if constexpr (singlePort){
+                uint8_t portBits = 0;
+                portBits|= ( (((byte >> index++)&1) ? T::pinNumber : 0) |...);
+                // portBits^=(1<<5);//FirstPort::read();
+                FirstPort::write( ~(pinPositions) | portBits );
+            }else{
                 (writeBit<T>( ((byte>>index++)&1) ), ...);
-            // }
+            }
         }
         static inline void setDirection(uint8_t mask){
             uint8_t index=0;

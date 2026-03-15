@@ -26,7 +26,7 @@ public:
         portType::clearMask(pinNumber);
     }
     static void toggle(){
-        portType::write(portType::read()^pinNumber);
+        portType::writeMask(portType::read()^pinNumber);
     }
     static bool isHigh(){
         return (portType::read()&(1<<BIT)) ? true : false;
