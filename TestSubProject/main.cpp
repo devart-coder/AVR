@@ -1,5 +1,5 @@
 #include <Nano.h>
-#include <ExternalInterrupt.h>
+// #include <ExternalInterrupt.h>
 #include <Delay.h>
 #include <Bus.h>
 #include <Timer0.h>
@@ -10,17 +10,17 @@ using LED = SystemClock;
 static uint32_t counter=0;
 int main()
 {
-    RGB::setDirection(0b1001);
+    RGB::setDirection(0b0001);
     LED::setDefaultSettings();
     LED::setCallback([](){
         ++counter;
         counter%=800*2;
     });
     LED::start();
-    RGB::get<3>::setHigh();
     for(int i=0; ; ++i, i%=8){
         if(counter==1000){
             LED::stop();
+            RGB::get<3>::toggle();
             delayMs(1000);
             counter=200;
             LED::start();

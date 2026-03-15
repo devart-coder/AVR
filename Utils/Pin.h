@@ -19,14 +19,14 @@ public:
 
     static void setHigh()
     {
-        portType::writeMask(1<<BIT);
+        portType::writeMask(pinNumber);
     }
     static void setLow()
     {
-        portType::clearByMask(1<<BIT);
+        portType::clearMask(pinNumber);
     }
     static void toggle(){
-        portType::write(portType::read()^(1<<BIT));
+        portType::write(portType::read()^pinNumber);
     }
     static bool isHigh(){
         return (portType::read()&(1<<BIT)) ? true : false;
@@ -34,14 +34,14 @@ public:
     static void setDirection( Direction dir){
         switch(dir){
             case Direction::INPUT:
-                portType::resetDirectionMask(1<<BIT);
+                portType::resetDirectionMask(pinNumber);
                 break;
             case Direction::INPUT_PULL_UP:
-                portType::resetDirectionMask(1<<BIT);
+                portType::resetDirectionMask(pinNumber);
                 Pin::setHigh();
                 break;
             case Direction::OUTPUT:
-                portType::setDirectionMask(1<<BIT);
+                portType::setDirectionMask(pinNumber);
                 break;
         }
     }

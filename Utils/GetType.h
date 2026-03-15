@@ -4,6 +4,7 @@
 
 template<uint8_t index, class HEAD, class ...TAIL>
 struct GetType{
+    static_assert(index <= sizeof...(TAIL), "Index out of range in GetType");
     using type = typename GetType<index-1,TAIL...>::type;
 };
 
