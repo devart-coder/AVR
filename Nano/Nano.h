@@ -1,8 +1,8 @@
 #ifndef NANO_H
 #define NANO_H
 #include "Atmega328p.h"
-#include "Pin.h"
-#include "Port.h"
+#include "../Utils/Pin.h"
+#include "../Utils/Port.h"
 namespace Nano{
     using Atmega328p::Registers;
     using PortD = Port<Registers::R_PORTD>;

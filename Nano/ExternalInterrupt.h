@@ -2,7 +2,7 @@
 #define EXTERNALINTERRUPT_H
 #include <Utils.h>
 #include <Nano.h>
-#include <Callable.h>
+#include <../Utils/Callable.h>
 #include <avr/interrupt.h>//deprecated
 
 namespace Nano {

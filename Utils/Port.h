@@ -10,26 +10,27 @@ class Port : private Base{
     public:
         static constexpr uint16_t port = PORT;
         static constexpr uint16_t ddr = static_cast<uint16_t>(PORT)-1;
-        static constexpr uint16_t pin = static_cast<uint16_t>(PORT)-2;
-        static inline void setMode(uint8_t byte){
+        static constexpr uint16_t pins = static_cast<uint16_t>(PORT)-2;
+
+        static inline void setDirection(uint8_t byte){
             reference(ddr)=byte;
         }
-        static inline void setModeByMask(uint8_t byte){
+        static inline void setDirectionMask(uint8_t byte){
             reference(ddr)|=byte;
         }
-        static inline void clearModeByMask(uint8_t byte){
+        static inline void resetDirectionMask(uint8_t byte){
             reference(ddr)&=~byte;
         }
         static inline void write(uint8_t byte){
             reference(port)=byte;
         }
         static inline uint8_t read(){
-            return reference(port);
+            return reference(pins);
         }
         static inline void writeMask(uint8_t byte){
             reference(port)|=byte;
         }
-        static inline void clearByMask(uint8_t byte){
+        static inline void clearMask(uint8_t byte){
             reference(port)&=~byte;
         }
 };

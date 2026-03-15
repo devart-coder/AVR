@@ -1,9 +1,9 @@
 #ifndef TIMER__H
 #define TIMER__H
-#include <Base.h>
+#include <../Utils/Base.h>
 #include <avr/interrupt.h>
 #include <Nano.h>
-#include <Callable.h>
+#include <../Utils/Callable.h>
 namespace Nano {
     enum class Prescaling{
         NoSource=0,

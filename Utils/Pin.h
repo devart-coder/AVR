@@ -1,7 +1,7 @@
 #ifndef PIN_H
 #define PIN_H
 #include <inttypes.h>
-#include "Atmega328p.h"
+#include "../Nano/Atmega328p.h"
 #include "Port.h"
 template<class PORT, uint8_t BIT>
 class Pin
@@ -11,7 +11,8 @@ public:
     using portType = PORT;
     enum class Direction:uint8_t{
         INPUT,
-        OUTPUT
+        OUTPUT,
+        INPUT_PULL_UP
     };
     static void setHigh()
     {
@@ -25,11 +26,21 @@ public:
         portType::write(portType::read()^(1<<BIT));
     }
     static bool isHigh(){
-        //TODO::Remake
-        return true;
+        return (portType::read()&(1<<BIT)) ? true : false;
     }
     static void setMode( Direction dir){
-        dir == Direction::OUTPUT ? portType::setModeByMask(1<<BIT) : portType::clearModeByMask(1<<BIT);
+        switch(dir){
+            case Direction::INPUT:
+                portType::resetDirectionMask(1<<BIT);
+                break;
+            case Direction::INPUT_PULL_UP:
+                portType::resetDirectionMask(1<<BIT);
+                Pin::setHigh();
+                break;
+            case Direction::OUTPUT:
+                portType::setDirectionMask(1<<BIT);
+                break;
+        }
     }
 };
 
