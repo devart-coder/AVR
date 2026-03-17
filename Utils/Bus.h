@@ -4,8 +4,8 @@
 #include <Base.h>
 #include <Utils.h>
 #include <GetType.h>
+#include <Pin.h>
 
-using namespace Utils::Templates;
 template<class ...T>
 class Bus : Base{
     private://Functions
@@ -19,7 +19,7 @@ class Bus : Base{
         }
         template<class P>
         static inline void setDirectionBit(bool bit){
-            bit == true ? P::setMode(P::Direction::OUTPUT) : P::setMode(P::Direction::INPUT);
+            bit == true ? P::setMode(Utils::Direction::OUTPUT) : P::setMode(Utils::Direction::INPUT);
         }
 
     private://Types
@@ -28,7 +28,7 @@ class Bus : Base{
 
     private://Values
         static constexpr uint8_t  pinPositions = ( T::pinNumber | ... );
-        static constexpr bool  singlePort = ( is_same_v<typename T::portType , FirstPort>  && ... );
+        static constexpr bool  singlePort = ( Utils::Templates::is_same_v<typename T::portType , FirstPort>  && ... );
 
     public:
         static inline void write(uint8_t byte){
@@ -36,8 +36,17 @@ class Bus : Base{
             if constexpr (singlePort){
                 uint8_t portBits = 0;
                 portBits|= ( (((byte >> index++)&1) ? T::pinNumber : 0) |...);
-                // portBits^=(1<<5);//FirstPort::read();
-                FirstPort::write( ~(pinPositions) | portBits );
+                FirstPort::write( (~(pinPositions)&FirstPort::read()) | portBits );
+            }else{
+                (writeBit<T>( ((byte>>index++)&1) ), ...);
+            }
+        }
+        static inline void writeMask(uint8_t byte){
+                uint8_t index = 0 ;
+            if constexpr (singlePort){
+                uint8_t portBits = 0;
+                portBits|= ( (((byte >> index++)&1) ? T::pinNumber : 0) |...);
+                FirstPort::writeMask( (~(pinPositions)&FirstPort::read()) | portBits );
             }else{
                 (writeBit<T>( ((byte>>index++)&1) ), ...);
             }

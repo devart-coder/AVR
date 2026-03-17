@@ -115,8 +115,8 @@ class UART : Base{
         while (!(reference(Registers::R_UCSR0A) & (1 << UDRE0)));
         reference(Registers::R_UDR0)=c;
     }
-    static inline void print(int number){
-            char result[Utils::Conversions::digits(number)];
+    static inline void print(unsigned int number){
+            char result[Utils::Conversions::digits(number)+1];
             Utils::Conversions::toString(number,result);
             print(result);
     }
@@ -125,7 +125,7 @@ class UART : Base{
         print(string);
         print('\n');
     }
-    static inline void println(int number){
+    static inline void println(unsigned int number){
         print(number);
         print('\n');
     }

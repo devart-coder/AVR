@@ -2,7 +2,7 @@
 #define ATMEGA328P_H
 #include <inttypes.h>
 namespace Atmega328p {
-    enum Registers:uint16_t{
+    enum Registers:uint8_t{
         R_UDR0 = 0xC6,
 
         R_UBRR0H=0xC5,
@@ -49,7 +49,6 @@ namespace Atmega328p {
         R_ADCH=0x79,
         R_ADCL=0x78,
 
-        //TIMSK
         R_TIMSK2=0x70,
         R_TIMSK1=0x6F,
         R_TIMSK0=0x6E,
@@ -90,9 +89,7 @@ namespace Atmega328p {
         R_OCR0A=0x47,
 
         R_TCNT0=0x46,
-        //Timer Counter Controll Register #B
         R_TCCR0B=0x45,
-        //Timer Counter Controll Register #A
         R_TCCR0A=0x44,
         R_GTCCR=0x43,
         R_EEARH=0x42,
@@ -106,7 +103,6 @@ namespace Atmega328p {
         R_EIFR=0x3C,
         R_PCIFR=0x3B,
 
-        //TIFR
         R_TIFR2=0x37,
         R_TIFR1=0x36,
         R_TIFR0=0x35,
