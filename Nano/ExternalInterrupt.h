@@ -15,7 +15,17 @@ namespace Nano {
     };
 
     template<class PIN, uint8_t number=PIN::pinNumber, class T = Utils::Templates::enable_if_t<(number == (1<<2)) || ( number == (1<<3))> >
-    class ExternalInterrupt : public Callable<void(*)()>, Base{
+    class ExternalInterrupt : Base{
+    protected:
+        using HandleType = void(*)();
+        static inline HandleType callback = nullptr;
+    public:
+        static void setCallback(HandleType f ){
+            callback=f;
+        }
+        static void handle(){
+            callback();
+        }
         public:
         static inline void setTriggerMode(TriggerMode mode){
             if constexpr (number == (1<<2)){
@@ -29,7 +39,7 @@ namespace Nano {
                         break;
                     case TriggerMode::FALLING_EDGE:
                         reference(Registers::R_EICRA)|=(1<<ISC01);
-                        reference(Registers::R_EICRA)=~(1<<ISC00);
+                        reference(Registers::R_EICRA)&=~(1<<ISC00);
                         break;
                     case TriggerMode::RISING_EDGE:
                         reference(Registers::R_EICRA)|=(1<<ISC01);
@@ -48,7 +58,7 @@ namespace Nano {
                         break;
                     case TriggerMode::FALLING_EDGE:
                         reference(Registers::R_EICRA)|=(1<<ISC11);
-                        reference(Registers::R_EICRA)=~(1<<ISC10);
+                        reference(Registers::R_EICRA)&=~(1<<ISC10);
                         break;
                     case TriggerMode::RISING_EDGE:
                         reference(Registers::R_EICRA)|=(1<<ISC11);

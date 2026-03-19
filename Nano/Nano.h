@@ -33,5 +33,8 @@ namespace Nano{
     using PinA2 = Pin<PortC, 2>;
     using PinA3 = Pin<PortC, 3>;
     using PinA4 = Pin<PortC, 4>;
+    using PinA5 = Pin<PortC, 5>;
+    using PinA6 = Pin<PortC, 6>;
+    using PinA7 = Pin<PortC, 7>;
 }
 #endif // NANO_H

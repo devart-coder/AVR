@@ -1,14 +1,16 @@
-#ifndef PWD_H
-#define PWD_H
+#ifndef PWM_H
+#define PWM_H
 #include <inttypes.h>
 #include <Timer0.h>
-#include <../Utils/Base.h>
+#include <Base.h>
 #include <Nano.h>
 #include <Utils.h>
+#include <Delay.h>
+
 namespace Nano{
     using namespace Utils::Templates;
     template < class P , class T =  enable_if_t< (pin_with_number<P,5>::value || pin_with_number<P,6>::value)> >
-    class PWD : Timer0{
+    class PWM : Timer0{
         enum class OutMode{
             NORMAL,
             INVERSION
@@ -48,7 +50,15 @@ namespace Nano{
                 setPrescaling(Nano::Prescaling::_64);//1ms for 16MHz
             }
     };
-    using PWDD5 = PWD<Nano::PinD5>;
-    using PWDD6 = PWD<Nano::PinD6>;
+    using PWMD5 = PWM<Nano::PinD5>;
+    using PWMD6 = PWM<Nano::PinD6>;
+
+    template<class PIN, class T = Utils::Templates::enable_if_t<is_pin<PIN>::value> >
+    static void programmPWD(uint32_t dirtyCircle, uint32_t time){
+        PIN::setHigh();
+        delayMs(dirtyCircle);
+        PIN::setLow();
+        delayMs(time - dirtyCircle);
+    }
 }
-#endif // PWD_H
+#endif // PWM_H

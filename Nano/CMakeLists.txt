@@ -8,7 +8,7 @@ add_library(Nano STATIC
     Atmega328p.h
     Nano.h
     Delay.h
-    PWD.h
+    PWM.h
     Timer0.h Timer0.cpp
     UART.h
     ExternalInterrupt.h

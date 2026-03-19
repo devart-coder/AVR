@@ -29,54 +29,63 @@ namespace Nano {
         ALL=7
     };
 
-    class Timer0 : public Callable<void(*)()>, protected Base
+    class Timer0 : protected Base
     {
-        using HandleType = void (*)(char);
-        static inline HandleType callBack = nullptr;
-        static Prescaling prescaling;
+    private:
+        using HandleType = void(*)();
+        static inline HandleType callback = nullptr;
+    public:
+        static void setCallback(HandleType f ){
+            callback=f;
+        }
+        static void handle(){
+            callback();
+        }
+    private:
+        using HandleTypeChar = void (*)();
+        static inline HandleTypeChar callACharBack = nullptr;
+        static inline HandleTypeChar callBCharBack = nullptr;
+
+        static  inline Prescaling prescaling = Prescaling::_64;
         protected:
         static inline void m_setPrescaling(Prescaling p){
+            reference(Registers::R_TCCR0B)&=~((1<<CS02)|(1<<CS01)|(1<<CS00));
             switch(p){
                 case Prescaling::NoSource:
-                    reference(Registers::R_TCCR0B)&=~((1<<CS02)|(1<<CS01)|(1<<CS00));
                     break;
                 case Prescaling::_1:
-                    reference(Registers::R_TCCR0B)=(~(1<<CS02) & ~(1<<CS01))|(1<<CS00);
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
+                    reference(Registers::R_TCCR0B)=(1<<CS00);
                     break;
                 case Prescaling::_8:
-                    reference(Registers::R_TCCR0B)=(~(1<<CS02) & ~(1<<CS00))|(1<<CS01);
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
+                    reference(Registers::R_TCCR0B)=(1<<CS01);
                     break;
                 case Prescaling::_64:
-                    reference(Registers::R_TCCR0B)=~(1<<CS02) & ((1<<CS00)|(1<<CS01));
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
+                    reference(Registers::R_TCCR0B)|= (1<<CS00)|(1<<CS01);
                     break;
                 case Prescaling::_256:
-                    reference(Registers::R_TCCR0B)=(~(1<<CS01) & ~(1<<CS00))|(1<<CS02);
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
+                    reference(Registers::R_TCCR0B)=(1<<CS02);
                     break;
                 case Prescaling::_1024:
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
+                    reference(Registers::R_TCCR0B)=(1<<CS02)|(1<<CS00);
                     break;
                 case Prescaling::ExternalClockFaling:
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
                     break;
                 case Prescaling::ExternalClockRising:
-                    // reference(Registers::R_TCCR0B)|=static_cast<uint8_t>(p);
                     break;
             };
         }
         static inline void setMode(Mode mode){
+            reference(Registers::R_TCCR0A)=static_cast<uint8_t>(Mode::NORMAL);
             switch(mode){
-                case Mode::NORMAL:
                 case Mode::CTC:
                 case Mode::PWD_FAST:
                 case Mode::PWD_PHASE_CORRECT:
                     reference(Registers::R_TCCR0A)|=static_cast<uint8_t>(mode);
             }
         }
+    public:
         static inline void setInterruptMode(InterruptMode mode){
+            reference(Registers::R_TIMSK0)=0;
             switch(mode){
                 case InterruptMode::OVERFLOW:
                 case InterruptMode::COMPARE_A:
@@ -86,18 +95,45 @@ namespace Nano {
             }
         }
     public:
+        static inline void setCounterA(uint8_t value){
+            reference(Registers::R_OCR0A)=value;
+        }
+        static inline const uint8_t counterA(){
+            return reference(Registers::R_OCR0A);
+        }
+        static inline void setCounterB(uint8_t value){
+            reference(Registers::R_OCR0B)=value;
+        }
+        static inline const uint8_t counterB(){
+            return reference(Registers::R_OCR0B);
+        }
         static inline void setDefaultSettings(){
             cli();
             setPrescaling(Prescaling::_64);
             setMode(Mode::NORMAL);
-            setInterruptMode(InterruptMode::OVERFLOW);
+            // setInterruptMode(InterruptMode::COMPARE_A);
+            // setInterruptMode(InterruptMode::OVERFLOW);
+            // enableOverFlowInterrupt();
+            enableAChannelInterrupt();
+            enableBChannelInterrupt();
             sei();
         }
-
+        static void resetCounter(){
+            reference(Registers::R_TCNT0)=0;
+        }
+        static void enableAChannelInterrupt(){
+            reference(Registers::R_TIMSK0)|=(1<<1);
+        }
+        static void enableBChannelInterrupt(){
+            reference(Registers::R_TIMSK0)|=(1<<2);
+        }
+        static void enableOverFlowInterrupt(){
+            reference(Registers::R_TIMSK0)|=(1<<0);
+        }
         //
         static inline void stop(){
-            m_setPrescaling(Prescaling::NoSource);
             reference(Registers::R_TCNT0)=0;
+            m_setPrescaling(Prescaling::NoSource);
         }
         static inline void setPrescaling(Prescaling p){
             prescaling = p;
@@ -107,21 +143,27 @@ namespace Nano {
             m_setPrescaling(prescaling);
         }
         //
-        static inline void setCallbackByMatch(HandleType handle){
-            callBack = handle;
+        static inline void setCallbackByMatchA(HandleTypeChar handle){
+            callACharBack = handle;
         }
-        static void interruptByMatch(char c){
-            callBack(c);
+        static inline void setCallbackByMatchB(HandleTypeChar handle){
+            callBCharBack = handle;
+        }
+        static void interruptByMatchA(){
+            callACharBack();
+        }
+        static void interruptByMatchB(){
+            callBCharBack();
         }
         static Prescaling getPrescaling();
     };
 }
 using SystemClock = Nano::Timer0;
 ISR(TIMER0_COMPA_vect) {
-    SystemClock::interruptByMatch('A');
+    SystemClock::interruptByMatchA();
 }
 ISR(TIMER0_COMPB_vect) {
-    SystemClock::interruptByMatch('B');
+    SystemClock::interruptByMatchB();
 }
 ISR(TIMER0_OVF_vect) {
     SystemClock::handle();

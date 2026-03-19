@@ -5,10 +5,14 @@
 #include <Timer0.h>
 
 inline void delayMs(uint16_t MS){
-    _delay_ms(MS);
+    while(MS--){
+        _delay_ms(1);
+    }
 }
 inline void delayUs(uint16_t US){
-    _delay_us(US);
+    while(US--){
+        _delay_ms(1);
+    }
 }
 
 class Delay{
