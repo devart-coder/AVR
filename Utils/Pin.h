@@ -3,51 +3,51 @@
 #include <inttypes.h>
 #include "../Nano/Atmega328p.h"
 #include "Port.h"
-namespace Utils{
-enum class Direction:uint8_t{
+enum class PinMode{
     INPUT,
     OUTPUT,
     INPUT_PULL_UP
 };
 
-template<class PORT, uint8_t BIT>
-class Pin
-{
-public:
-    static constexpr uint8_t pinNumber = (1<<BIT);
-    using portType = PORT;
+namespace Utils{
 
-    static void setHigh()
+    template<class PORT, uint8_t BIT>
+    struct Pin
     {
-        portType::writeMask(pinNumber);
-    }
-    static void setLow()
-    {
-        portType::clearMask(pinNumber);
-    }
-    static void toggle(){
-        portType::write (portType::read()^pinNumber);
-    }
-    static bool isHigh(){
-        return (portType::read()&(1<<BIT)) ? true : false;
-    }
-    static bool isLow(){
-        return !isHigh();
-    }
-    static void setDirection( Direction dir){
-        switch(dir){
-            case Direction::INPUT:
-                portType::resetDirectionMask(pinNumber);
-                break;
-            case Direction::INPUT_PULL_UP:
-                portType::resetDirectionMask(pinNumber);
-                setHigh();
-                break;
-            case Direction::OUTPUT:
-                portType::setDirectionMask(pinNumber);
-                break;
+        static constexpr uint8_t pinNumber = (1<<BIT);
+        using portType = PORT;
+
+        static inline void setHigh()
+        {
+            portType::writeMask(pinNumber);
         }
-    }
-};
+        static inline void setLow()
+        {
+            portType::clearMask(pinNumber);
+        }
+        static inline void toggle(){
+            portType::write (portType::read()^pinNumber);
+        }
+        static inline bool isHigh(){
+            return (portType::read()&(1<<BIT)) ? true : false;
+        }
+        static inline bool isLow(){
+            return !isHigh();
+        }
+        static inline void setMode( PinMode pinMode){
+            switch(pinMode){
+                case PinMode::INPUT:
+                    portType::resetModeMask(pinNumber);
+                    break;
+                case PinMode::INPUT_PULL_UP:
+                    portType::resetModeMask(pinNumber);
+                    setHigh();
+                    break;
+                case PinMode::OUTPUT:
+                    portType::setModeMask(pinNumber);
+                    break;
+            }
+        }
+    };
 }
 #endif // PIN_H

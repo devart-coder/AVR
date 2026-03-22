@@ -76,7 +76,7 @@ namespace Nano {
     public:
         static inline void setDefaultSettings(){
             cli();
-            PIN::setDirection(Utils::Direction::INPUT_PULL_UP);
+            PIN::setMode(PinMode::INPUT_PULL_UP);
             setTriggerMode(TriggerMode::FALLING_EDGE);
             enableInterrupts();
             sei();

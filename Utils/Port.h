@@ -6,19 +6,18 @@
 using Atmega328p::Registers;
 
 template<Registers PORT>
-class Port : private Base{
-    public:
+struct Port : private Base{
         static constexpr uint16_t port = PORT;
         static constexpr uint16_t ddr = static_cast<uint16_t>(PORT)-1;
         static constexpr uint16_t pins = static_cast<uint16_t>(PORT)-2;
 
-        static inline void setDirection(uint8_t byte){
+        static inline void setMode(uint8_t byte){
             reference(ddr)=byte;
         }
-        static inline void setDirectionMask(uint8_t byte){
+        static inline void setModeMask(uint8_t byte){
             reference(ddr)|=byte;
         }
-        static inline void resetDirectionMask(uint8_t byte){
+        static inline void resetModeMask(uint8_t byte){
             reference(ddr)&=~byte;
         }
         static inline void write(uint8_t byte){

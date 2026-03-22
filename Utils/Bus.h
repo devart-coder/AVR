@@ -8,6 +8,10 @@
 
 template<class ...T>
 class Bus : Base{
+    public:
+        template<uint8_t n>
+        using get = typename GetType<n, T...>::type;
+
     private://Functions
         template<class HEAD, class... TAIL>
         struct FirstType{
@@ -19,17 +23,16 @@ class Bus : Base{
         }
         template<class P>
         static inline void setDirectionBit(bool bit){
-            bit == true ? P::setMode(Utils::Direction::OUTPUT) : P::setMode(Utils::Direction::INPUT);
+            bit == true ? P::setMode(PinMode::OUTPUT) : P::setMode(PinMode::INPUT);
         }
 
     private://Types
-        using FirstPin = typename FirstType<T...>::type;
+        using FirstPin = typename GetType<1, T...>::type;
         using FirstPort = typename FirstPin::portType;
 
     private://Values
         static constexpr uint8_t  pinPositions = ( T::pinNumber | ... );
         static constexpr bool  singlePort = ( Utils::Templates::is_same_v<typename T::portType , FirstPort>  && ... );
-
     public:
         static inline void write(uint8_t byte){
                 uint8_t index = 0 ;
@@ -56,13 +59,10 @@ class Bus : Base{
             if constexpr (singlePort){
                 uint8_t portBits = 0;
                 portBits|= ( (((mask >> index++)&1) ? T::pinNumber : 0) |...);
-                FirstPort::setDirectionMask( ((~pinPositions & reference(FirstPort::ddr)) | portBits) );
+                FirstPort::setModeMask( ((~pinPositions & reference(FirstPort::ddr)) | portBits) );
             }else{
                 (setDirectionBit<T>(((mask>>index++)&0x01)), ...);
             }
         }
-
-        template<uint8_t n>
-        using get = typename GetType<n, T...>::type;
 };
 #endif // BUS_H
