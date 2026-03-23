@@ -2,7 +2,7 @@
 #include <Delay.h>
 #include <ExternalInterrupt.h>
 #include <Bus.h>
-#include <Timer0.h>
+#include <Timer.h>
 #include <Delay.h>
 
 static int8_t counter = 0;
@@ -22,9 +22,9 @@ void breath(uint8_t delay){
     static bool switcher = false;
     for(uint8_t i=0; i < 255; ++i){
         if(switcher)
-            SystemClock::setCounterB(i);
+            SystemClock::Action::setCounterB(i);
         else
-            SystemClock::setCounterA(i);
+            SystemClock::Action::setCounterA(i);
         delayMs(delay);
     }
     switcher=!switcher;
@@ -46,9 +46,12 @@ int main()
     });
 
     //Clock
-    SystemClock::setDefaultSettings();
-    SystemClock::setCounterB(0);
-    SystemClock::setCallbackByMatchA([](){
+    SystemClock::Interruptes::enableAChannel();
+    SystemClock::Interruptes::enableBChannel();
+    SystemClock::Settings::setDefaultSettings();
+
+    SystemClock::Action::setCounterB(0);
+    SystemClock::Callback::byMatchA([](){
         MotorsD::get<0>::setLow();
         MotorsD::get<1>::setLow();
         MotorsB::write(0);
@@ -56,7 +59,7 @@ int main()
         if(counter>=6)
             RGB::write(!counter);
     });
-    SystemClock::setCallbackByMatchB([](){
+    SystemClock::Callback::byMatchB([](){
         MotorsD::get<0>::setHigh();
         MotorsD::get<1>::setHigh();
         MotorsB::write(0xff);
@@ -64,12 +67,12 @@ int main()
         if(counter>=6)
             RGB::write(counter);
     });
-    SystemClock::start();
+    SystemClock::Action::start();
 
     while(1){
         switch(counter){
             case 0:
-                SystemClock::setCounterA(1);
+                SystemClock::Action::setCounterA(1);
                 break;
             case 6:
                 breath(5);
@@ -78,7 +81,7 @@ int main()
                 breath(10);
                 break;
             default:
-                SystemClock::setCounterA((uint8_t)(((254*2)/10)*counter));
+                SystemClock::Action::setCounterA((uint8_t)(((254*2)/10)*counter));
         }
         RGB::write(counter);
     }

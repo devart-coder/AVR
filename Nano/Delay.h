@@ -2,7 +2,7 @@
 #define DELAY_H
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <Timer0.h>
+#include <Timer.h>
 
 inline void delayMs(uint16_t MS){
     while(MS--){

@@ -9,7 +9,7 @@ add_library(Nano STATIC
     Nano.h
     Delay.h
     PWM.h
-    Timer0.h Timer0.cpp
+    Timer.h Timer.cpp
     UART.h
     ExternalInterrupt.h
 )

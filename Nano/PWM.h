@@ -1,7 +1,7 @@
 #ifndef PWM_H
 #define PWM_H
 #include <inttypes.h>
-#include <Timer0.h>
+#include <Timer.h>
 #include <Base.h>
 #include <Nano.h>
 #include <Utils.h>
