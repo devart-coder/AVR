@@ -11,7 +11,7 @@ inline void delayMs(uint16_t MS){
 }
 inline void delayUs(uint16_t US){
     while(US--){
-        _delay_ms(1);
+        _delay_us(1);
     }
 }
 

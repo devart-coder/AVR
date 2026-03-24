@@ -5,7 +5,8 @@
 #include <Callable.h>
 #include <avr/interrupt.h>
 namespace Nano {
-    using namespace Atmega328p::Bits;
+using namespace Atmega328p::Bits;
+
 
     enum class Prescaling{
         NoSource,
@@ -43,7 +44,6 @@ namespace Nano {
                 static inline const uint8_t counterB(){
                     return reference(Registers::R_OCR0B);
                 }
-
                 static void setTimerCounter(uint8_t value){
                     reference(Registers::R_TCNT0)=value;
                 }
@@ -153,7 +153,6 @@ namespace Nano {
             using Interruptes = InterruptesInterface;
             using Action = ActionInterface;
             using Callback = CallbackInterface;
-
         };
     }
 
