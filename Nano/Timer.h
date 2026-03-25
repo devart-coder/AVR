@@ -7,7 +7,6 @@
 namespace Nano {
 using namespace Atmega328p::Bits;
 
-
     enum class Prescaling{
         NoSource,
         _1,
@@ -26,81 +25,187 @@ using namespace Atmega328p::Bits;
         PWD_PHASE_CORRECT=1
     };
 
+    template <uint8_t number>
     class Timer : public Callable, protected Base
     {
         private:
             static  inline Prescaling prescaling = Prescaling::_64;
         private:
             struct ActionInterface{
-                static inline void setCounterA(uint8_t value){
-                    reference(Registers::R_OCR0A)=value;
+                static inline void setCounterA(uint16_t value){
+                    if constexpr(number == 0){
+                        reference(Registers::R_OCR0A)=(value & 0xFF);
+                    }else if constexpr (number == 1){
+                        reference(Registers::R_OCR1AH)=(value >> 8);
+                        reference(Registers::R_OCR1AL)=(value & 0xFF);
+                    }else if constexpr (number == 2){
+                        reference(Registers::R_OCR2A)=(value & 0xFF);
+                    }
                 }
-                static inline const uint8_t counterA(){
-                    return reference(Registers::R_OCR0A);
+                static inline const uint16_t counterA(){
+                    if constexpr(number == 0){
+                        return reference(Registers::R_OCR0A);
+                    }else if constexpr (number == 1){
+                        auto h = reference(Registers::R_OCR1AH);
+                        auto l = reference(Registers::R_OCR1AL);
+                        return (h|l);
+                    }else if constexpr (number == 2){
+                        return reference(Registers::R_OCR2A);
+                    }
                 }
-                static inline void setCounterB(uint8_t value){
-                    reference(Registers::R_OCR0B)=value;
+                static inline void setCounterB(uint16_t value){
+                    if constexpr(number == 0){
+                        reference(Registers::R_OCR0B)=(value & 0xFF);
+                    }else if constexpr (number == 1){
+                        reference(Registers::R_OCR1BH)=(value >> 8);
+                        reference(Registers::R_OCR1BL)=(value & 0xFF);
+                    }else if constexpr (number == 2){
+                        reference(Registers::R_OCR2B)=(value & 0xFF);
+                    }
                 }
-                static inline const uint8_t counterB(){
-                    return reference(Registers::R_OCR0B);
+                static inline const uint16_t counterB(){
+                    if constexpr(number == 0){
+                        return reference(Registers::R_OCR0B);
+                    }else if constexpr (number == 1){
+                        auto h = reference(Registers::R_OCR1BH);
+                        auto l = reference(Registers::R_OCR1BL);
+                        return (h|l);
+                    }else if constexpr (number == 2){
+                        return reference(Registers::R_OCR2B);
+                    }
                 }
-                static void setTimerCounter(uint8_t value){
-                    reference(Registers::R_TCNT0)=value;
+                static void setTimerCounter(uint16_t value){
+                    if constexpr(number == 0){
+                        reference(Registers::R_TCNT0) = (value & 0xFF);
+                    }else if constexpr (number == 1){
+                        reference(Registers::R_TCNT1H)=(value >> 8);
+                        reference(Registers::R_TCNT1L)=(value & 0xFF);
+                    }else if constexpr (number == 2){
+                        reference(Registers::R_TCNT2)=(value & 0xFF);
+                    }
                 }
-                static const uint8_t timerCounter(){
-                    return reference(Registers::R_TCNT0);
+                static const uint16_t timerCounter(){
+                    if constexpr(number == 0){
+                        return reference(Registers::R_TCNT0);
+                    }else if constexpr (number == 1){
+                        auto h = reference(Registers::R_TCNT1H);
+                        auto l = reference(Registers::R_TCNT1L);
+                        return (h|l);
+                    }else if constexpr (number == 2){
+                        return reference(Registers::R_TCNT2);
+                    }
                 }
                 static inline void stop(){
                     setTimerCounter(0);
-                    Settings::setPrescaling(Prescaling::NoSource);
+                    Setting::setPrescaling(Prescaling::NoSource);
                 }
                 static inline void start(){
-                    Settings::setPrescaling(prescaling);
+                    Setting::setPrescaling(prescaling);
                 }
             };
         private://Interruptes
             struct InterruptesInterface{
                 static void enableAChannel(){
-                    reference(Registers::R_TIMSK0)|=(1<<1);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)|=(1<< OCIE0A);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)|=(1<< OCIE1A);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)|=(1<< OCIE2A);
                 }
                 static void enableBChannel(){
-                    reference(Registers::R_TIMSK0)|=(1<<2);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)|=(1<< OCIE0B);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)|=(1<< OCIE1B);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)|=(1<< OCIE2B);
                 }
                 static void enableOverFlow(){
-                    reference(Registers::R_TIMSK0)|=(1<<0);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)|=(1<<0);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)|=(1<<0);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)|=(1<<0);
                 }
 
                 static void disableAChannelInterrupt(){
-                    reference(Registers::R_TIMSK0)&=~(1<<1);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)&=~(1<< OCIE0A);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)&=~(1<< OCIE1A);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)&=~(1<< OCIE2A);
                 }
                 static void disableBChannelInterrupt(){
-                    reference(Registers::R_TIMSK0)&=~(1<<2);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)&=~(1<< OCIE0B);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)&=~(1<< OCIE1B);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)&=~(1<< OCIE2B);
                 }
                 static void disableOverFlowInterrupt(){
-                    reference(Registers::R_TIMSK0)&=~(1<<0);
+                    if constexpr(number == 0)
+                        reference(Registers::R_TIMSK0)&=~(1<<0);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TIMSK1)&=~(1<<0);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TIMSK2)&=~(1<<0);
                 }
             };
         private://Settings
             struct SettingsInterface{
                 static inline void setPrescaling(Prescaling p){
-                    reference(Registers::R_TCCR0B)&=~((1<<CS02)|(1<<CS01)|(1<<CS00));
+                    if constexpr (number == 0)
+                        reference(Registers::R_TCCR0B)&=~((1<<CS02)|(1<<CS01)|(1<<CS00));
+                    else if constexpr (number == 1)
+                        reference(Registers::R_TCCR1B)&=~((1<<CS12)|(1<<CS11)|(1<<CS10));
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TCCR2B)&=~((1<<CS22)|(1<<CS21)|(1<<CS20));
                     switch(p){
                         case Prescaling::NoSource:
                             break;
                         case Prescaling::_1:
-                            reference(Registers::R_TCCR0B)|=(1<<CS00);
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0B)|=(1<<CS00);
+                            else if constexpr(number == 1)
+                                reference(Registers::R_TCCR1B)|=(1<<CS10);
+                            else if constexpr(number == 2)
+                                reference(Registers::R_TCCR2B)|=(1<<CS20);
                             break;
                         case Prescaling::_8:
-                            reference(Registers::R_TCCR0B)|=(1<<CS01);
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0B)|=(1<<CS01);
+                            else if constexpr(number == 1)
+                                reference(Registers::R_TCCR1B)|=(1<<CS11);
+                            else if constexpr(number == 2)
+                                reference(Registers::R_TCCR2B)|=(1<<CS21);
                             break;
                         case Prescaling::_64:
-                            reference(Registers::R_TCCR0B)|= (1<<CS00)|(1<<CS01);
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0B)|=(1<<CS00)|(1<<CS01);
+                            else if constexpr(number == 1)
+                                reference(Registers::R_TCCR1B)|=(1<<CS10)|(1<<CS11);
+                            else if constexpr(number == 2)
+                                reference(Registers::R_TCCR2B)|=(1<<CS20)|(1<<CS21);
                             break;
                         case Prescaling::_256:
-                            reference(Registers::R_TCCR0B)=(1<<CS02);
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0B)|=(1<<CS02);
+                            else if constexpr(number == 1)
+                                reference(Registers::R_TCCR1B)|=(1<<CS12);
+                            else if constexpr(number == 2)
+                                reference(Registers::R_TCCR2B)|=(1<<CS22);
                             break;
                         case Prescaling::_1024:
-                            reference(Registers::R_TCCR0B)=(1<<CS02)|(1<<CS00);
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0B)|=(1<<CS02)|(1<<CS00);
+                            else if constexpr(number == 1)
+                                reference(Registers::R_TCCR1B)|=(1<<CS12)|(1<<CS10);
+                            else if constexpr(number == 2)
+                                reference(Registers::R_TCCR2B)|=(1<<CS22)|(1<<CS20);
                             break;
                         case Prescaling::ExternalClockFaling:
                             //TODO::REALIZE
@@ -110,61 +215,90 @@ using namespace Atmega328p::Bits;
                             break;
                     };
                 }
-                static Prescaling getPrescaling();
+                static Prescaling getPrescaling()
+                {
+                    return prescaling;
+                }
                 static inline void setMode(Mode mode){
-                    reference(Registers::R_TCCR0A)=static_cast<uint8_t>(Mode::NORMAL);
+                    uint8_t ref = 0;
+                    if constexpr (number == 0)
+                        ref = reference(Registers::R_TCCR0A);//=static_cast<uint8_t>(Mode::NORMAL);
+                    if constexpr (number == 1)
+                        ref =reference(Registers::R_TCCR1A);//=static_cast<uint8_t>(Mode::NORMAL);
+                    if constexpr (number == 2)
+                        ref = reference(Registers::R_TCCR2A);//=static_cast<uint8_t>(Mode::NORMAL);
                     switch(mode){
                         case Mode::CTC:
                         case Mode::PWD_FAST:
                         case Mode::PWD_PHASE_CORRECT:
-                            reference(Registers::R_TCCR0A)|=static_cast<uint8_t>(mode);
+                            ref=static_cast<uint8_t>(mode);
                     }
                 }
                 static inline void setDefaultSettings(){
                     cli();
                     setPrescaling(Prescaling::_64);
-                    Settings::setMode(Mode::NORMAL);
+                    Setting::setMode(Mode::NORMAL);
                     sei();
                 }
             };
         private://Callback
             class CallbackInterface{
-                static inline HandleType callACharBack = nullptr;
-                static inline HandleType callBCharBack = nullptr;
+                static inline HandleType callBackAChannel = nullptr;
+                static inline HandleType callBackBChannel = nullptr;
             public:
                 static void setPrescaling(Prescaling p){
                     prescaling = p;
                 }
                 static void byMatchA(HandleType handle){
-                    callACharBack = handle;
+                    callBackAChannel = handle;
                 }
                 static inline void byMatchB(HandleType handle){
-                    callBCharBack = handle;
+                    callBackBChannel = handle;
                 }
                 static void interruptByMatchA(){
-                    callACharBack();
+                    callBackAChannel();
                 }
                 static void interruptByMatchB(){
-                    callBCharBack();
+                    callBackBChannel();
                 }
             };
         public :
-            using Settings = SettingsInterface;
-            using Interruptes = InterruptesInterface;
+            using Setting = SettingsInterface;
+            using Interrupte = InterruptesInterface;
             using Action = ActionInterface;
             using Callback = CallbackInterface;
         };
     }
 
-    using SystemClock = Nano::Timer;
+    using Timer0 = Nano::Timer<0>;
+    using Timer1 = Nano::Timer<1>;
+    using Timer2 = Nano::Timer<2>;
 
     ISR(TIMER0_COMPA_vect) {
-        SystemClock::Callback::interruptByMatchA();
+        Timer0::Callback::interruptByMatchA();
     }
     ISR(TIMER0_COMPB_vect) {
-        SystemClock::Callback::interruptByMatchB();
+        Timer0::Callback::interruptByMatchB();
     }
     ISR(TIMER0_OVF_vect) {
-        SystemClock::handle();
+        Timer0::handle();
+    }
+    ISR(TIMER1_COMPA_vect) {
+        Timer1::Callback::interruptByMatchA();
+    }
+    ISR(TIMER1_COMPB_vect) {
+        Timer1::Callback::interruptByMatchB();
+    }
+    ISR(TIMER1_OVF_vect) {
+        Timer1::handle();
+    }
+    ISR(TIMER2_COMPA_vect) {
+        Timer2::Callback::interruptByMatchA();
+    }
+    ISR(TIMER2_COMPB_vect) {
+        Timer2::Callback::interruptByMatchB();
+    }
+    ISR(TIMER2_OVF_vect) {
+        Timer2::handle();
     }
 #endif // TIMER__H

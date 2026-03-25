@@ -20,8 +20,8 @@ namespace Atmega328p {
         R_TWBR=0xB8,
 
         R_ASSR=0xB6,
-        R_OCR2RB=0xB4,
-        R_OCR2RA=0xB3,
+        R_OCR2B=0xB4,
+        R_OCR2A=0xB3,
         R_TCNT2=0xB2,
         R_TCCR2B=0xB1,
         R_TCCR2A=0xB0,

@@ -23,7 +23,9 @@ add_link_options(-mmcu=${MCU})
 # Флаги линковки для удаления "мёртвого" кода шаблонов
 add_link_options(-Wl,--gc-sections)
 
-add_executable(TestSubProject main.cpp)
+add_executable(TestSubProject main.cpp
+    # ForJulie.cpp
+)
 target_link_libraries(TestSubProject PUBLIC Nano Utils)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
