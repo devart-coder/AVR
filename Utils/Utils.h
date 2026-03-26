@@ -3,6 +3,28 @@
 #include <Nano.h>
 #include <Port.h>
 namespace Utils{
+    template<Registers REG>
+    struct RegistorAction : Base{
+        static void assignByte(uint8_t&& byte){
+            reference(REG)=byte;
+        }
+        static void setByte(uint8_t&& byte){
+            reference(REG)|=byte;
+        }
+        static void resetByte(uint8_t&& byte){
+            reference(REG)&=~byte;
+        }
+        static void toogleByte(uint8_t&& byte){
+            reference(REG)^=byte;
+        }
+        static uint8_t reg(){
+            return reference(REG);
+        }
+    };
+    template<Registers REG>
+    struct BitsAction : Base{
+    };
+
     namespace Conversions {
         unsigned int digits(unsigned int number){
             int i=0;

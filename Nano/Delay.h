@@ -15,12 +15,12 @@ inline void delayUs(uint16_t US){
     }
 }
 
-class Delay{
-    public:
-    static inline uint32_t millis(){
+// class Delay{
+//     public:
+//     static inline uint32_t millis(){
 
-    }
+//     }
 
-};
+// };
 
 #endif // DELAY_H

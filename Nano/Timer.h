@@ -20,22 +20,22 @@ using namespace Atmega328p::Bits;
     };
 
     enum class Mode{
-        NORMAL=0,
-        CTC=2,
-        PWD_FAST=3,
-        PWD_PHASE_CORRECT=1
+        NORMAL,
+        CTC,
+        PWD_FAST,
+        PWD_PHASE_CORRECT
     };
 
     template <uint8_t number>
     class Timer : public Callable, protected Base
     {
-        private:
+        // private:
             static  inline Prescaling prescaling = Prescaling::_64;
         private:
             struct ActionInterface{
                 template<class T>
-                static inline void setCounterA(T value){
-                    if constexpr (Utils::Templates::is_same_v<T,uint8_t> || Utils::Templates::is_same_v<T,int>){
+                static inline void setCounterA(T&& value){
+                    if constexpr (Utils::Templates::is_same_v<T,uint8_t> || Utils::Templates::is_same_v<T,int8_t>){
                         if constexpr(number == 0){
                             reference(Registers::R_OCR0A)= value;
                         }else if constexpr (number == 1){
@@ -87,12 +87,12 @@ using namespace Atmega328p::Bits;
                 }
                 static void setTimerCounter(uint16_t value){
                     if constexpr(number == 0){
-                        reference(Registers::R_TCNT0) = (value & 0xFF);
+                        reference(Registers::R_TCNT0)  = (value & 0xFF);
                     }else if constexpr (number == 1){
-                        reference(Registers::R_TCNT1H)=(value >> 8);
-                        reference(Registers::R_TCNT1L)=(value & 0xFF);
+                        reference(Registers::R_TCNT1H) = (value >> 8);
+                        reference(Registers::R_TCNT1L) = (value & 0xFF);
                     }else if constexpr (number == 2){
-                        reference(Registers::R_TCNT2)=(value & 0xFF);
+                        reference(Registers::R_TCNT2)  = (value & 0xFF);
                     }
                 }
                 static const uint16_t timerCounter(){
@@ -108,67 +108,119 @@ using namespace Atmega328p::Bits;
                 }
                 static inline void stop(){
                     setTimerCounter(0);
+                    setCounterA(0);
+                    setCounterA(0);
                     Setting::setPrescaling(Prescaling::NoSource);
                 }
                 static inline void start(){
-                    Setting::setPrescaling(prescaling);
+                    Setting::setUpPrescaling(prescaling);
+                }
+                static Prescaling getPrescaling()
+                {
+                    return prescaling;
                 }
             };
         private://Interruptes
-            struct InterruptesInterface{
+            class InterruptesInterface{
+                template<char c>
+                void enableChannel(bool&& flag){
+                    if constexpr(number == 0){
+                        if constexpr (c == 'A')
+                            flag ?
+                                reference(Registers::R_TIMSK0)|=(1<< OCIE0A) :
+                                    reference(Registers::R_TIMSK0)&=~(1<< OCIE0A);
+
+                        else if constexpr (c=='B')
+                            flag ?
+                                reference(Registers::R_TIMSK0)|=(1<< OCIE0B) :
+                                    reference(Registers::R_TIMSK0)&=~(1<< OCIE0B);
+                        else if constexpr (c=='O')
+                            flag ?
+                                reference(Registers::R_TIMSK0)|=(1<<0) :
+                                    reference(Registers::R_TIMSK0)&=~(1<<0);
+                    }
+                    else if constexpr(number == 1){
+                        if constexpr (c == 'A')
+                            flag ?
+                                reference(Registers::R_TIMSK1)|=(1<< OCIE1A) :
+                                    reference(Registers::R_TIMSK1)&=~(1<< OCIE1A);
+                        else if constexpr (c=='B')
+                            flag ?
+                                reference(Registers::R_TIMSK1)|=(1<< OCIE1B) :
+                                    reference(Registers::R_TIMSK1)&=~(1<< OCIE1B);
+                        else if constexpr (c=='O')
+                            flag ?
+                                reference(Registers::R_TIMSK1)|=(1<<0) :
+                                    reference(Registers::R_TIMSK1)&=~(1<<0);
+                    }
+                    else if constexpr(number == 2){
+                        if constexpr (c == 'A')
+                            flag ?
+                                reference(Registers::R_TIMSK2)|=(1<< OCIE2A):
+                                    reference(Registers::R_TIMSK2)&=~(1<< OCIE2A);
+                        else if constexpr (c=='B')
+                            flag ?
+                                reference(Registers::R_TIMSK2)|=(1<< OCIE2B):
+                                    reference(Registers::R_TIMSK2)&=~(1<< OCIE2B);
+                        else if constexpr (c=='O')
+                            flag ?
+                                reference(Registers::R_TIMSK2)|=(1<<0):
+                                    reference(Registers::R_TIMSK2)&=~(1<<0);
+                    }
+                }
+                public:
                 static void enableAChannel(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)|=(1<< OCIE0A);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)|=(1<< OCIE1A);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)|=(1<< OCIE2A);
+                    enableChannel<'A'>(true);
                 }
                 static void enableBChannel(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)|=(1<< OCIE0B);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)|=(1<< OCIE1B);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)|=(1<< OCIE2B);
+                    enableChannel<'B'>(true);
                 }
                 static void enableOverFlow(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)|=(1<<0);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)|=(1<<0);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)|=(1<<0);
+                    enableChannel<'O'>(true);
                 }
 
                 static void disableAChannelInterrupt(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)&=~(1<< OCIE0A);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)&=~(1<< OCIE1A);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)&=~(1<< OCIE2A);
+                    enableChannel<'A'>(false);
                 }
                 static void disableBChannelInterrupt(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)&=~(1<< OCIE0B);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)&=~(1<< OCIE1B);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)&=~(1<< OCIE2B);
+                    enableChannel<'B'>(false);
                 }
                 static void disableOverFlowInterrupt(){
-                    if constexpr(number == 0)
-                        reference(Registers::R_TIMSK0)&=~(1<<0);
-                    else if constexpr(number == 1)
-                        reference(Registers::R_TIMSK1)&=~(1<<0);
-                    else if constexpr(number == 2)
-                        reference(Registers::R_TIMSK2)&=~(1<<0);
+                    enableChannel<'O'>(false);
                 }
             };
         private://Settings
-            struct SettingsInterface{
-                static inline void setPrescaling(Prescaling p){
+            class SettingsInterface{
+                template<uint8_t _1, uint8_t _2, uint8_t _3>
+                static void assignPrescalingBits(uint8_t&& f=0, uint8_t&& s=0, uint8_t&& t=0){
+                    if constexpr (number == 0)
+                        reference(Registers::R_TCCR0B)|=(1<<_1)|(1<<f);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TCCR1B)|=(1<<_2)|(1<<s);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TCCR2B)|=(1<<_3)|(1<<t);
+                }
+                template<uint8_t _1, uint8_t _2, uint8_t _3>
+                static void assignModeBits(uint8_t&& f=0, uint8_t&& s=0, uint8_t&& t=0){
+                    if constexpr (number == 0)
+                        reference(Registers::R_TCCR0A)|=(1<<_1)|(1<<f);
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TCCR1A)|=(1<<_2)|(1<<s);
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TCCR2A)|=(1<<_3)|(1<<t);
+                }
+
+                template<uint8_t _1, uint8_t _2, uint8_t _3>
+                static void resetModeBits(uint8_t&& f=0, uint8_t&& s=0, uint8_t&& t=0){
+                    if constexpr (number == 0)
+                        reference(Registers::R_TCCR0A)&=~((1<<_1)|(1<<f));
+                    else if constexpr(number == 1)
+                        reference(Registers::R_TCCR1A)&=~((1<<_2)|(1<<s));
+                    else if constexpr(number == 2)
+                        reference(Registers::R_TCCR2A)&=~((1<<_3)|(1<<t));
+                }
+                public:
+                static inline void setUpPrescaling(Prescaling p){
                     if constexpr (number == 0)
                         reference(Registers::R_TCCR0B)&=~((1<<CS02)|(1<<CS01)|(1<<CS00));
                     else if constexpr (number == 1)
@@ -179,44 +231,19 @@ using namespace Atmega328p::Bits;
                         case Prescaling::NoSource:
                             break;
                         case Prescaling::_1:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0B)|=(1<<CS00);
-                            else if constexpr(number == 1)
-                                reference(Registers::R_TCCR1B)|=(1<<CS10);
-                            else if constexpr(number == 2)
-                                reference(Registers::R_TCCR2B)|=(1<<CS20);
+                            assignPrescalingBits<CS00,CS10,CS20>();
                             break;
                         case Prescaling::_8:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0B)|=(1<<CS01);
-                            else if constexpr(number == 1)
-                                reference(Registers::R_TCCR1B)|=(1<<CS11);
-                            else if constexpr(number == 2)
-                                reference(Registers::R_TCCR2B)|=(1<<CS21);
+                            assignPrescalingBits<CS01,CS11,CS21>();
                             break;
                         case Prescaling::_64:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0B)|=(1<<CS00)|(1<<CS01);
-                            else if constexpr(number == 1)
-                                reference(Registers::R_TCCR1B)|=(1<<CS10)|(1<<CS11);
-                            else if constexpr(number == 2)
-                                reference(Registers::R_TCCR2B)|=(1<<CS20)|(1<<CS21);
+                            assignPrescalingBits<CS00,CS10,CS20>(CS01,CS11,CS21);
                             break;
                         case Prescaling::_256:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0B)|=(1<<CS02);
-                            else if constexpr(number == 1)
-                                reference(Registers::R_TCCR1B)|=(1<<CS12);
-                            else if constexpr(number == 2)
-                                reference(Registers::R_TCCR2B)|=(1<<CS22);
+                            assignPrescalingBits<CS02,CS12,CS22>();
                             break;
                         case Prescaling::_1024:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0B)|=(1<<CS02)|(1<<CS00);
-                            else if constexpr(number == 1)
-                                reference(Registers::R_TCCR1B)|=(1<<CS12)|(1<<CS10);
-                            else if constexpr(number == 2)
-                                reference(Registers::R_TCCR2B)|=(1<<CS22)|(1<<CS20);
+                            assignPrescalingBits<CS02,CS12,CS22>(CS00,CS10,CS20);
                             break;
                         case Prescaling::ExternalClockFaling:
                             //TODO::REALIZE
@@ -226,29 +253,22 @@ using namespace Atmega328p::Bits;
                             break;
                     };
                 }
-                static Prescaling getPrescaling()
-                {
-                    return prescaling;
+                static void setPrescaling(Prescaling p){
+                    prescaling = p;
                 }
                 static inline void setMode(Mode mode){
-                    // if constexpr (number == 0)
-                        // reference(Registers::R_TCCR0A)=static_cast<uint8_t>(Mode::NORMAL);
-                    // if constexpr (number == 1)
-                        // reference(Registers::R_TCCR1A)=static_cast<uint8_t>(Mode::NORMAL);
-                    // if constexpr (number == 2)
-                        // reference(Registers::R_TCCR2A)=static_cast<uint8_t>(Mode::NORMAL);
+                    resetModeBits<WGM01,WGM11, WGM21> (WGM00, WGM20, WGM20);
                     switch(mode){
-                        case Mode::PWD_FAST:
-                            if constexpr (number == 0)
-                                reference(Registers::R_TCCR0A)|=static_cast<uint8_t>(mode);
-                            if constexpr (number == 1)
-                                reference(Registers::R_TCCR1A)|=static_cast<uint8_t>(mode);
-                            if constexpr (number == 2)
-                                reference(Registers::R_TCCR2A)|=(1<<WGM20)|(1<<WGM20);
-                            break;
-                        case Mode::CTC:
+                        case Mode::NORMAL:
                             break;
                         case Mode::PWD_PHASE_CORRECT:
+                            assignModeBits<WGM00, WGM10, WGM20>();
+                            break;
+                        case Mode::CTC:
+                            assignModeBits<WGM01, WGM11, WGM21>();
+                            break;
+                        case Mode::PWD_FAST:
+                            assignModeBits<WGM01, WGM11, WGM21>( WGM00, WGM10, WGM20);
                             break;
                         };
                 }
@@ -264,9 +284,7 @@ using namespace Atmega328p::Bits;
                 static inline HandleType callBackAChannel = nullptr;
                 static inline HandleType callBackBChannel = nullptr;
             public:
-                static void setPrescaling(Prescaling p){
-                    prescaling = p;
-                }
+
                 static void byMatchA(HandleType handle){
                     Interrupte::enableAChannel();
                     callBackAChannel = handle;
