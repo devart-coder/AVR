@@ -9,56 +9,102 @@
 
 namespace Nano{
     using namespace Utils::Templates;
-    template < class P , class T =  enable_if_t< (pin_with_number<P,5>::value || pin_with_number<P,6>::value)> >
-    class PWM : Timer0{
+
+template < class P , class T =  enable_if_t<any_pin_of_v<P::pinNumber, PinD3, PinD5, PinD6, PinD9, PinD10, PinD11>> >
+    class PWM : Base{
+        private:
+            static constexpr uint8_t timerOrder =
+                (any_pin_of_v<P::pinNumber, PinD5, PinD6> ) ? 0 :
+                    (any_pin_of_v<P::pinNumber, PinD9, PinD10>) ? 1 : 2;
+            using timer = Timer<timerOrder>;
         enum class OutMode{
             NORMAL,
             INVERSION
         };
         private:
             static inline void setOutMode(OutMode mode){
-                if(P::pinNumber == (1<<6)){
+                if constexpr(is_same_v<P,PinD6>){
                     switch(mode){
                         case OutMode::INVERSION:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0A0);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0A0)|(1<<COM0A1);
+                            break;
                         case OutMode::NORMAL:
                             reference(Registers::R_TCCR0A)|=(1<<COM0A1);
+                            break;
                     }
-                }
-                if(P::pinNumber == (1<<5)){
+                }else if constexpr(is_same_v<P,PinD5>){
                     switch(mode){
                         case OutMode::INVERSION:
-                            reference(Registers::R_TCCR0A)|=(1<<COM0B0);
+                            reference(Registers::R_TCCR0A)|=(1<<COM0B0)|(1<<COM0B1);
+                            break;
                         case OutMode::NORMAL:
                             reference(Registers::R_TCCR0A)|=(1<<COM0B1);
+                            break;
+                    }
+                }else if constexpr (is_same_v<P,PinD9>){
+                    switch(mode){
+                        case OutMode::INVERSION:
+                            reference(Registers::R_TCCR1A)|=(1<<COM1A0)|(1<<COM1A1);
+                            break;
+                        case OutMode::NORMAL:
+                            reference(Registers::R_TCCR1A)|=(1<<COM1A1);
+                            break;
+                    }
+                }else if constexpr (is_same_v<P,PinD10>){
+                    switch(mode){
+                        case OutMode::INVERSION:
+                            reference(Registers::R_TCCR1A)|=(1<<COM1B0)|(1<<COM1B1);
+                            break;
+                        case OutMode::NORMAL:
+                            reference(Registers::R_TCCR1A)|=(1<<COM1B1);
+                            break;
+                    }
+                }else if constexpr (is_same_v<P,PinD11>){
+                    switch(mode){
+                        case OutMode::INVERSION:
+                            reference(Registers::R_TCCR2A)|=(1<<COM2A0)|(1<<COM2A1);
+                            break;
+                        case OutMode::NORMAL:
+                            reference(Registers::R_TCCR2A)|=(1<<COM2A1);
+                            break;
+                    }
+                }else if constexpr (is_same_v<P,PinD3>){
+                    switch(mode){
+                        case OutMode::INVERSION:
+                            reference(Registers::R_TCCR2A)|=(1<<COM2B0)|(1<<COM2B1);
+                            break;
+                        case OutMode::NORMAL:
+                            reference(Registers::R_TCCR2A)|=(1<<COM2B1);
+                            break;
                     }
                 }
             }
         public:
+            // template<class T>
+            //TODO::AppendPairtificateRealizeForuint16_t
             static inline void setDirtyPercent(uint8_t per){
                 if ((per < 0)||(per>100))
                     return;
-                if constexpr  (P::pinNumber == (1<<6))
-                    reference(Registers::R_OCR0A)= static_cast<uint8_t>((per*255)/100);
-                if constexpr (P::pinNumber == (1<<5))
-                    reference(Registers::R_OCR0B)= static_cast<uint8_t>((per*255)/100);
+                if constexpr  (is_same_v<P,PinD6>|| is_same_v<P,PinD9>||is_same_v<P,PinD11>)
+                    timer::Action::setCounterA((per*0xFF)/100);
+                else if constexpr (is_same_v<P,PinD3>||is_same_v<P,PinD5>||is_same_v<P,PinD10>)
+                    timer::Action::setCounterB((per*0xFF)/100);
             }
             static inline void setDefaultSettings(){
-                P::setDirection(Direction::OUTPUT);
+                cli();
+                P::setMode(PinMode::OUTPUT);
+
+                timer::Setting::setPrescaling(Nano::Prescaling::_64);
+                timer::Setting::setMode(Mode::PWD_FAST);
                 setOutMode(OutMode::NORMAL);
-                setMode(Mode::PWD_FAST);
-                setPrescaling(Nano::Prescaling::_64);//1ms for 16MHz
+
+                sei();
             }
     };
+    using PWMD3 = PWM<Nano::PinD3>;
     using PWMD5 = PWM<Nano::PinD5>;
     using PWMD6 = PWM<Nano::PinD6>;
-
-    template<class PIN, class T = Utils::Templates::enable_if_t<is_pin<PIN>::value> >
-    static void programmPWD(uint32_t dirtyCircle, uint32_t time){
-        PIN::setHigh();
-        delayMs(dirtyCircle);
-        PIN::setLow();
-        delayMs(time - dirtyCircle);
-    }
+    using PWMD9 = PWM<Nano::PinD9>;
+    using PWMD11 = PWM<Nano::PinD11>;
 }
 #endif // PWM_H

@@ -4,6 +4,7 @@
 #include <Base.h>
 #include <Callable.h>
 #include <avr/interrupt.h>
+#include <Utils.h>
 namespace Nano {
 using namespace Atmega328p::Bits;
 
@@ -32,23 +33,33 @@ using namespace Atmega328p::Bits;
             static  inline Prescaling prescaling = Prescaling::_64;
         private:
             struct ActionInterface{
-                static inline void setCounterA(uint16_t value){
-                    if constexpr(number == 0){
-                        reference(Registers::R_OCR0A)=(value & 0xFF);
-                    }else if constexpr (number == 1){
-                        reference(Registers::R_OCR1AH)=(value >> 8);
-                        reference(Registers::R_OCR1AL)=(value & 0xFF);
-                    }else if constexpr (number == 2){
-                        reference(Registers::R_OCR2A)=(value & 0xFF);
+                template<class T>
+                static inline void setCounterA(T value){
+                    if constexpr (Utils::Templates::is_same_v<T,uint8_t> || Utils::Templates::is_same_v<T,int>){
+                        if constexpr(number == 0){
+                            reference(Registers::R_OCR0A)= value;
+                        }else if constexpr (number == 1){
+                            reference(Registers::R_OCR1AH) = 0;
+                            reference(Registers::R_OCR1AL) = value;
+                        }else if constexpr (number == 2){
+                            reference(Registers::R_OCR2A)=value;
+                        }
+                    }
+                    if constexpr (Utils::Templates::is_same_v<T,uint16_t> || Utils::Templates::is_same_v<T,int16_t>){
+                        if constexpr (number == 1){
+                            reference(Registers::R_OCR1AH) = static_cast<uint8_t>(value >> 8);
+                            reference(Registers::R_OCR1AL) = static_cast<uint8_t>(value & 0xFF);
+                        }
                     }
                 }
+
                 static inline const uint16_t counterA(){
                     if constexpr(number == 0){
                         return reference(Registers::R_OCR0A);
                     }else if constexpr (number == 1){
-                        auto h = reference(Registers::R_OCR1AH);
                         auto l = reference(Registers::R_OCR1AL);
-                        return (h|l);
+                        auto h = reference(Registers::R_OCR1AH);
+                        return ((static_cast<uint16_t>(h) << 8)|l);
                     }else if constexpr (number == 2){
                         return reference(Registers::R_OCR2A);
                     }
@@ -67,9 +78,9 @@ using namespace Atmega328p::Bits;
                     if constexpr(number == 0){
                         return reference(Registers::R_OCR0B);
                     }else if constexpr (number == 1){
-                        auto h = reference(Registers::R_OCR1BH);
                         auto l = reference(Registers::R_OCR1BL);
-                        return (h|l);
+                        auto h = reference(Registers::R_OCR1BH);
+                        return ((static_cast<uint16_t>(h) << 8)|l);
                     }else if constexpr (number == 2){
                         return reference(Registers::R_OCR2B);
                     }
@@ -88,9 +99,9 @@ using namespace Atmega328p::Bits;
                     if constexpr(number == 0){
                         return reference(Registers::R_TCNT0);
                     }else if constexpr (number == 1){
-                        auto h = reference(Registers::R_TCNT1H);
                         auto l = reference(Registers::R_TCNT1L);
-                        return (h|l);
+                        auto h = reference(Registers::R_TCNT1H);
+                        return ((static_cast<uint16_t>(h) << 8)|l);
                     }else if constexpr (number == 2){
                         return reference(Registers::R_TCNT2);
                     }
@@ -220,19 +231,26 @@ using namespace Atmega328p::Bits;
                     return prescaling;
                 }
                 static inline void setMode(Mode mode){
-                    uint8_t ref = 0;
-                    if constexpr (number == 0)
-                        ref = reference(Registers::R_TCCR0A);//=static_cast<uint8_t>(Mode::NORMAL);
-                    if constexpr (number == 1)
-                        ref =reference(Registers::R_TCCR1A);//=static_cast<uint8_t>(Mode::NORMAL);
-                    if constexpr (number == 2)
-                        ref = reference(Registers::R_TCCR2A);//=static_cast<uint8_t>(Mode::NORMAL);
+                    // if constexpr (number == 0)
+                        // reference(Registers::R_TCCR0A)=static_cast<uint8_t>(Mode::NORMAL);
+                    // if constexpr (number == 1)
+                        // reference(Registers::R_TCCR1A)=static_cast<uint8_t>(Mode::NORMAL);
+                    // if constexpr (number == 2)
+                        // reference(Registers::R_TCCR2A)=static_cast<uint8_t>(Mode::NORMAL);
                     switch(mode){
-                        case Mode::CTC:
                         case Mode::PWD_FAST:
+                            if constexpr (number == 0)
+                                reference(Registers::R_TCCR0A)|=static_cast<uint8_t>(mode);
+                            if constexpr (number == 1)
+                                reference(Registers::R_TCCR1A)|=static_cast<uint8_t>(mode);
+                            if constexpr (number == 2)
+                                reference(Registers::R_TCCR2A)|=(1<<WGM20)|(1<<WGM20);
+                            break;
+                        case Mode::CTC:
+                            break;
                         case Mode::PWD_PHASE_CORRECT:
-                            ref=static_cast<uint8_t>(mode);
-                    }
+                            break;
+                        };
                 }
                 static inline void setDefaultSettings(){
                     cli();
@@ -250,9 +268,11 @@ using namespace Atmega328p::Bits;
                     prescaling = p;
                 }
                 static void byMatchA(HandleType handle){
+                    Interrupte::enableAChannel();
                     callBackAChannel = handle;
                 }
                 static inline void byMatchB(HandleType handle){
+                    Interrupte::enableBChannel();
                     callBackBChannel = handle;
                 }
                 static void interruptByMatchA(){

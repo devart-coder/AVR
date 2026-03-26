@@ -6,20 +6,19 @@
 #include <avr/interrupt.h>//deprecated
 
 namespace Nano {
-
+    using Utils::Templates::enable_if_t;
+    using Utils::Templates::any_pin_of;
     enum class TriggerMode{
         LOW_LEVEL,
         ANY_CHANGE,
         FALLING_EDGE,
         RISING_EDGE
     };
-
-    using Utils::Templates::enable_if_t;
-    template< class PIN, uint8_t number=PIN::pinNumber, class T = enable_if_t<(number == (1<<2)) || ( number == (1<<3))> >
+    template< class PIN, class T = enable_if_t< any_pin_of<number, PinD2, PinD3>::value > >
     class ExternalInterrupt : public Callable, Base {
         private:
             static inline void setTriggerMode(TriggerMode mode){
-                if constexpr (number == (1<<2)){
+                if constexpr (PIN::pinNumber == (1<<2)){
                     reference(Registers::R_EICRA)&=~((1<<ISC01)|(1<<ISC00));
                     switch(mode){
                         case TriggerMode::LOW_LEVEL:
@@ -53,7 +52,7 @@ namespace Nano {
                 }//INT1
             }
             static inline void enableInterrupts(){
-                if constexpr (number == (1<<2))
+                if constexpr (PIN::pinNumber == (1<<2))
                     reference(Registers::R_EIMSK)|=(1<<INT0);
                 else
                     reference(Registers::R_EIMSK)|=(1<<INT1);

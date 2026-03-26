@@ -50,29 +50,50 @@ namespace Utils{
         template<class T>
         using is_pin_v = typename is_pin<T>::value;
 
-        template< class PIN, uint8_t number, class P = void >
+        template< class PIN, uint16_t number, class P = void >
         struct pin_with_number{
             static constexpr bool value = false;
         };
 
-        template< class PIN, uint8_t  number>
+        template< class PIN, uint16_t  number>
         struct pin_with_number<PIN, number, enable_if_t<(PIN::pinNumber == (1<<number))> >{
             static constexpr bool value = true;
         };
 
-        //isSame
-        template<typename T, typename U>
+        template< class PIN, uint16_t  number>
+        static constexpr bool pin_with_number_v = pin_with_number<PIN,number>::value;
+
+        template<class T, class U>
         struct is_same {
             static constexpr bool value = false;
         };
 
-        template<typename T>
+        template<class T>
         struct is_same<T, T> {
             static constexpr bool value = true;
         };
 
-        template<typename T, typename U>
+        template<class T, class U>
         inline constexpr bool is_same_v = is_same<T, U>::value;
+
+        template<uint8_t number, class ...U>
+        struct any_pin_of{
+            static constexpr bool value = ( (number == U::pinNumber) || ...);
+        };
+
+        template<uint8_t number, class ...U>
+        inline constexpr bool any_pin_of_v = any_pin_of<number, U...>::value;
+
+        template<uint8_t number, bool value>
+        struct return_if{
+        };
+
+        template<uint8_t number>
+        struct return_if<number,true>{
+            static constexpr bool value = number;
+        };
+        template<uint8_t number, bool value>
+        inline constexpr uint8_t return_if_v = return_if<number, value>::value;
     }
 }
 #endif // UTILS_H
