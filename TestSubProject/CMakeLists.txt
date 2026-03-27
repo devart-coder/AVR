@@ -22,8 +22,8 @@ add_definitions("-DF_CPU=${F_CPU}")
 add_link_options(-mmcu=${MCU})
 # Флаги линковки для удаления "мёртвого" кода шаблонов
 add_link_options(-Wl,--gc-sections)
-
-add_executable(TestSubProject main.cpp
+add_executable(TestSubProject
+    main.cpp
     # ForJulie.cpp
 )
 target_link_libraries(TestSubProject PUBLIC Nano Utils)
@@ -37,6 +37,6 @@ add_custom_target(upload
     COMMENT "Uploading to Arduino Nano..."
 )
 add_custom_target(size
-    COMMAND avr-size ${PROJECT_NAME}.hex
+    COMMAND avr-size ${PROJECT_NAME}
     DEPENDS ${PROJECT_NAME}
 )

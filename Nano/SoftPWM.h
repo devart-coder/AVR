@@ -3,38 +3,35 @@
 #include <Timer.h>
 #include <Bus.h>
     //SoftPWM::Settings::setMode(NORMAL,INVERSION);
-    //SoftPWM::Action::setDirtyPercent(uint8_t );
-    //SoftPWM::Action::setDirtyByte(uint8_t );
 
-    template <class BUS>
+    template <class... PINS>
     class SoftPWM{
-        using timer = Timer0;
+        using Timer = Nano::Timer<0>;
+        using b = Bus<PINS...>;
         class ActionInterface{
             public:
             ActionInterface(){
-                BUS::setDirection(0xff);
-                timer::Setting::defaultSettings();
-                timer::Callback::byMatchA([](){
-                    BUS::write(0xff);
+                b::setDirection(0xff);
+                Timer::Setting::defaultSettings();
+                Timer::Callback::byMatchA([](){
+                    b::write(0xff);
                 });
-                timer::Callback::byMatchB([](){
-                    BUS::write(0);
+                Timer::Callback::byMatchB([](){
+                    b::write(0);
                 });
             }
             static inline void start(){
-                timer::Action::start();
+                Timer::Action::start();
             }
-            static inline void setDirtyPercent(uint8_t p){
-                timer::Action::setCounterA((p*0xff)/100);
+            static inline void setDutyCycle(uint8_t p){
+                Timer::Action::setCounterA((p*0xff)/100);
             }
-            static inline void setDirtyByte(uint8_t byte){
-                timer::Action::setCounterA(byte);
+            static inline void setDutyByte(uint8_t byte){
+                Timer::Action::setCounterA(byte);
             }
         };
         public:
             static inline ActionInterface action = ActionInterface();
     };
-    template<class... PINS>
-    using Soft = SoftPWM<Bus<PINS...>>;
 
 #endif // SOFTPWM_H

@@ -47,14 +47,14 @@ template < class P , class T =  enable_if_t<any_pin_of_v<P::pinNumber, PinD3, Pi
                 }
             }
         public:
-            static inline void setDirtyPercent(uint8_t per){
+            static inline void setDutyCycle(uint8_t per){
                 static_assert((per < 0)||(per>100),"Dirty percent is not correct");
                 if constexpr  (is_same_v<P,PinD6>||is_same_v<P,PinD9>||is_same_v<P,PinD11>)
                     timer::Action::setCounterA((per*0xFF)/100);
                 else if constexpr (is_same_v<P,PinD3>||is_same_v<P,PinD5>||is_same_v<P,PinD10>)
                     timer::Action::setCounterB((per*0xFF)/100);
             }
-            static inline void setDirtyNumber(uint8_t number){
+            static inline void setDutyNumber(uint8_t number){
                 if constexpr  (is_same_v<P,PinD6>||is_same_v<P,PinD9>||is_same_v<P,PinD11>)
                     timer::Action::setCounterA(number);
                 else if constexpr (is_same_v<P,PinD3>||is_same_v<P,PinD5>||is_same_v<P,PinD10>)

@@ -32,9 +32,7 @@ using namespace Atmega328p::Bits;
             static  inline Prescaling prescaling = Prescaling::NoSource;
         private:
             struct ActionInterface{
-                template<class T>
-                static inline void setCounterA(T&& value){
-                    // if constexpr (Utils::Templates::is_same_v<T,uint8_t> || Utils::Templates::is_same_v<T,int>){
+                static inline void setCounterA(uint8_t value){
                         if constexpr(number == 0){
                             reference(Registers::R_OCR0A)= value;
                         }else if constexpr (number == 1){
@@ -43,13 +41,6 @@ using namespace Atmega328p::Bits;
                         }else if constexpr (number == 2){
                             reference(Registers::R_OCR2A)=value;
                         }
-                    // }
-                    // if constexpr (Utils::Templates::is_same_v<T,uint16_t> || Utils::Templates::is_same_v<T,int16_t>){
-                        // if constexpr (number == 1){
-                            // reference(Registers::R_OCR1AH) = static_cast<uint8_t>(value >> 8);
-                            // reference(Registers::R_OCR1AL) = static_cast<uint8_t>(value & 0xFF);
-                        // }
-                    // }
                 }
 
                 static inline const uint16_t counterA(){
@@ -84,14 +75,14 @@ using namespace Atmega328p::Bits;
                         return reference(Registers::R_OCR2B);
                     }
                 }
-                static void setTimerCounter(uint16_t value){
+                static void setTimerCounter(uint8_t value){
                     if constexpr(number == 0){
-                        reference(Registers::R_TCNT0)  = (value & 0xFF);
+                        reference(Registers::R_TCNT0)  = value;
                     }else if constexpr (number == 1){
-                        reference(Registers::R_TCNT1H) = static_cast<uint8_t>(value >> 8);
-                        reference(Registers::R_TCNT1L) = static_cast<uint8_t>(value & 0xFF);
+                        reference(Registers::R_TCNT1H) = 0;//static_cast<uint8_t>(value >> 8);
+                        reference(Registers::R_TCNT1L) = value;
                     }else if constexpr (number == 2){
-                        reference(Registers::R_TCNT2)  = (value & 0xFF);
+                        reference(Registers::R_TCNT2)  = value;
                     }
                 }
                 static const uint16_t timerCounter(){
@@ -287,10 +278,10 @@ using namespace Atmega328p::Bits;
                     Interrupte::enableBChannel();
                     callBackBChannel = handle;
                 }
-                static void interruptByMatchA(){
+                static inline void interruptByMatchA(){
                     callBackAChannel();
                 }
-                static void interruptByMatchB(){
+                static inline void interruptByMatchB(){
                     callBackBChannel();
                 }
             };
