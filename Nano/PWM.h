@@ -7,6 +7,7 @@
 #include <Utils.h>
 #include <Delay.h>
 
+//TODO:: For Timer<1> define new method : 'setMaxTimerCounter()'
 namespace Nano{
     using namespace Utils::Templates;
     enum class OutMode{
@@ -47,8 +48,7 @@ template < class P , class T =  enable_if_t<any_pin_of_v<P::pinNumber, PinD3, Pi
             }
         public:
             static inline void setDirtyPercent(uint8_t per){
-                if ((per < 0)||(per>100))
-                    return;
+                static_assert((per < 0)||(per>100),"Dirty percent is not correct");
                 if constexpr  (is_same_v<P,PinD6>||is_same_v<P,PinD9>||is_same_v<P,PinD11>)
                     timer::Action::setCounterA((per*0xFF)/100);
                 else if constexpr (is_same_v<P,PinD3>||is_same_v<P,PinD5>||is_same_v<P,PinD10>)
@@ -65,7 +65,7 @@ template < class P , class T =  enable_if_t<any_pin_of_v<P::pinNumber, PinD3, Pi
                 P::setMode(PinMode::OUTPUT);
                 timer::Setting::setPrescaling(Nano::Prescaling::_64);
                 timer::Setting::setMode(Mode::PWD_FAST);
-                setOutMode(OutMode::INVERSION);
+                setOutMode(OutMode::NORMAL);
                 timer::Action::start();
                 sei();
             }

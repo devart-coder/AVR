@@ -2,14 +2,14 @@
 #define DELAY_H
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <Timer.h>
+// #include <Timer.h>
 
-inline void delayMs(uint16_t MS){
+static constexpr void delayMs(uint16_t MS){
     while(MS--){
         _delay_ms(1);
     }
 }
-inline void delayUs(uint16_t US){
+static constexpr void delayUs(uint16_t US){
     while(US--){
         _delay_us(1);
     }

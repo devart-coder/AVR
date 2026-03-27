@@ -1,39 +1,35 @@
 #include <Nano.h>
-// #include <Delay.h>
-#include <PWM.h>
+#include <Delay.h>
+#include <Timer.h>
 using namespace Nano;
 int main()
 {
-    PinD9::setMode(PinMode::OUTPUT);
-        // pinMode(9, OUTPUT);
+    //template<class... PINS>
+    //usings SoftPWM = SoftPWM<BUS<PINS>>
+    //SoftPWM::Settings::setMode(NORMAL,INVERSION);
+    //SoftPWM::Action::setDirtyPercent(uint8_t );
+    //SoftPWM::Action::setDirtyByte(uint8_t );
 
-        // 1. Сброс настроек
-        PWMD9::setDefaultSettings();
-        ICR1 = 6000;
-
-        // 3. Предделитель 8
-        // TCCR1B |= (1 << CS11);
-
-        // 4. Установка периода (например, 20кГц для тихих моторов)
-        // 16МГц / (1 * 20000) - 1 = 799. Предделитель 1 (CS10)
-        // ICR1 = 799;
-        // TCCR1B &= ~(1 << CS11); TCCR1B |= (1 << CS10);
-
-        // 5. Начальное заполнение 50%
-        PWMD9::setDirtyNumber(6000/2);
-        // OCR1AL = 6000/2;
-
-
-
+    PinD6::setMode(PinMode::OUTPUT);
+    // Timer0::Action::setCounterA(1);
+    // Timer0::Action::setCounterB(0);
+    Timer0::Setting::setDefaultSettings();
+    Timer0::Callback::byMatchA([](){
+        PinD6::setLow();
+    });
+    Timer0::Callback::byMatchB([](){
+        PinD6::setHigh();
+    });
+    Timer0::Action::start();
     while(1){
-        // for(uint8_t i =0; i!=100; ++i){
-        //     PWMD6::setDirtyNumber(i);
-        //     delayMs(3);
-        // }
-        // for(uint8_t i = 100; i!=0; --i){
-        //     PWMD6::setDirtyNumber(i);
-        //     delayMs(3);
-        // }
+        for(uint8_t i=0; i!=255; ++i){
+            Timer0::Action::setCounterA(i);
+            delayMs(3);
+        }
+        for(uint8_t i=0; i!=255; ++i){
+            Timer0::Action::setCounterB(i);
+            delayMs(3);
+        }
     }
     return 0;
 }
