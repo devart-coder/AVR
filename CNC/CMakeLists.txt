@@ -6,11 +6,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(CNC STATIC
-  CNC.cpp
-  CNC.h
+
+
   Point2D.h Point2D.cpp
   Place.h Place.cpp
-  # Point3D.h Point3D.cpp
+  Tool.h Tool.cpp
+  Point3D.h Point3D.cpp
+  Modement.h
 )
 
 target_include_directories(CNC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

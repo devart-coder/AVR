@@ -2,7 +2,7 @@
 #include <Delay.h>
 using namespace CNC;
 #define d 1
-#define times 500
+#define times 800
 void f (){
     XStep::setHigh();
     YStep::setHigh();
