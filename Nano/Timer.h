@@ -267,7 +267,7 @@ using namespace Atmega328p::Bits;
                             break;
                         };
                 }
-                static inline void setDefaultSettings(){
+                static inline void defaultSettings(){
                     cli();
                     setPrescaling(Prescaling::_64);
                     Setting::setMode(Mode::NORMAL);

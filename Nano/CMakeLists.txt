@@ -12,6 +12,8 @@ add_library(Nano STATIC
     Timer.h Timer.cpp
     UART.h
     ExternalInterrupt.h
+    SoftPWM.h
+
 )
 target_include_directories(Nano PUBLIC .)
 target_link_libraries(Nano PUBLIC Utils)

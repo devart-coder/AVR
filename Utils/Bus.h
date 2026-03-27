@@ -8,15 +8,18 @@
 
 template<class ...T>
 class Bus : Base{
-    public:
+
+
+    private://Functions
+        // template<class HEAD, class... TAIL>
+        // struct FirstType{
+            // using type = HEAD;
+        // };
+        public:
         template<uint8_t n>
         using get = typename GetType<n, T...>::type;
 
-    private://Functions
-        template<class HEAD, class... TAIL>
-        struct FirstType{
-            using type = HEAD;
-        };
+        private:
         template<class P>
         static inline void writeBit(bool bit){
             bit == true ? P::setHigh() : P::setLow();
@@ -27,7 +30,7 @@ class Bus : Base{
         }
 
     private://Types
-        using FirstPin = typename GetType<1, T...>::type;
+        using FirstPin = typename GetType<0, T...>::type;
         using FirstPort = typename FirstPin::portType;
 
     private://Values
