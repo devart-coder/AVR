@@ -11,20 +11,22 @@ class Movement{
             static inline left(){}
             static inline step(){}
     };
-    //struct YAxis{
-    using YDir  = Nano::PinD3;
-    using YStep = Nano::PinD6;
-    // static inline forward(){}
-    // static inline behavor(){}
-    // static inline step(){}
-    //}
-    //struct ZAxis{
-    using ZDir  = Nano::PinD4;
-    using ZStep = Nano::PinD7;
-    // static inline up(){}
-    // static inline down(){}
-    // static inline step(){}
-    //}
+    class YAxis{
+            using YDir  = Nano::PinD3;
+            using YStep = Nano::PinD6;
+        public:
+            static inline forward(){}
+            static inline behavor(){}
+            static inline step(){}
+    };
+    class ZAxis{
+            using ZDir  = Nano::PinD4;
+            using ZStep = Nano::PinD7;
+        public:
+            static inline up(){}
+            static inline down(){}
+            static inline step(){}
+    };
     public:
 
 
