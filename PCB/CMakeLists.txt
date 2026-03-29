@@ -35,6 +35,6 @@ add_custom_target(upload
     COMMENT "Uploading to Arduino Nano..."
 )
 add_custom_target(size
-    COMMAND avr-size ${PROJECT_NAME}.hex
+    COMMAND avr-size ${PROJECT_NAME}
     DEPENDS ${PROJECT_NAME}
 )

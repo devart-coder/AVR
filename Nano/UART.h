@@ -3,6 +3,7 @@
 #include <Nano.h>
 #include <Base.h>
 #include <Utils.h>
+#include <avr/interrupt.h>
 enum class BaudRate:unsigned long{
     _300=300,
     _1200=1200,
@@ -26,6 +27,7 @@ enum class ParityMode{
     Even,
     Odd
 };
+using namespace Atmega328p::Bits;
 class UART : Base{
     struct SettingInterface{
         static inline void enableDoubleSpeed(){
@@ -106,6 +108,8 @@ class UART : Base{
             reference(Registers::R_UDR0)=c;
         }
         static inline void print(unsigned int number){
+            if(number == 0)
+                print('0');
             char result[Utils::Conversions::digits(number)+1];
             Utils::Conversions::toString(number,result);
             print(result);

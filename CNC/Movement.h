@@ -11,10 +11,6 @@
   |					|
   |					.
 Y v				Z	|
-
-
-
-
 */
 class Movement{
     static constexpr uint8_t defaultDelay = 50 ;

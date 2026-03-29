@@ -3,13 +3,13 @@
 #include <Place.h>
 #include <Point3D.h>
 
-template <Size SIZE = _default, class T = uint32_t>
+template <MicroStep SIZE = _default, class T = uint32_t>
 class Tool{
-        static constexpr uint16_t FULL_TURN_STEPS = 3200;
         static constexpr uint16_t size = static_cast<uint16_t>(SIZE);
+        Place<SIZE,T> _place = Place<SIZE,T>();
+        Point3D<T> point = Point3D<T>();
         T Zpos;
     public:
-        Place<SIZE,T> place = Place<SIZE,T>();
         explicit Tool(T x=0, T y=0, T z=0)
         {
 
@@ -21,6 +21,9 @@ class Tool{
         explicit Tool(const Point3D<T>& point3D)
         {
 
+        }
+        Place<SIZE,T>& place(){
+            return _place;
         }
         void left(uint32_t value)
         {

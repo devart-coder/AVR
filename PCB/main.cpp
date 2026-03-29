@@ -1,27 +1,32 @@
 #define F_CPU 16000000UL
-#include <Tool.h>
+// #include <Tool.h>
+#include <Point3D.h>
+#include <UART.h>
+#include <Delay.h>
 int main()
 {
-    auto tool = Tool();
-    while(1){
-        tool.place.up(500);
-        // place.up(10);//-50.0mm
-        delayMs(1000);//wait
+    UART::Setting::defaultSettings();
+    // auto tool = Tool();
+    Point3D point = Point3D<unsigned int>(0,2,3);
+    System.out.println("Start");
+        System.out.print("X: ");
+        System.out.print(point.x().get());
+        System.out.print(" Y: ");
+        System.out.print(point.y().get());
+        System.out.print(" Z: ");
+        System.out.println(point.z().get());
+    for(uint32_t i=0;i!=10;++i){
+        System.out.println("New Positions: ");
 
-        tool.place.down(500);//+50.0mm
-        delayMs(1000);//wait
+        System.out.print("X: ");
+        System.out.print(point.x().inc());
+        System.out.print(" Y: ");
+        System.out.print(point.y().dec());
+        System.out.print(" Z: ");
+        System.out.println(point.z().get());
 
-        tool.right(500);//+50.0mm
-        delayMs(1000);//wait
+        delayMs(1000);
 
-        tool.left(500);//-50.0mm
-        delayMs(1000);//wait
-
-        tool.up(500);
-        delayMs(1000);//wait
-
-        tool.down(500);
-        delayMs(1000);//wait
     }
     return 0;
 }
