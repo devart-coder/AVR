@@ -11,8 +11,9 @@ add_library(CNC STATIC
   Point2D.h Point2D.cpp
   Place.h Place.cpp
   Tool.h Tool.cpp
-  Point3D.h Point3D.cpp
-  Modement.h
+  # Point3D.h Point3D.cpp
+  Movement.h
+
 )
 
 target_include_directories(CNC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

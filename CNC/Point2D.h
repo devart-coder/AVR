@@ -5,35 +5,44 @@ template< class T = uint32_t>
 class Point2D
 {
     private:
-        T XPosition;
-        T YPosition;
+        T x_pos;
+        T y_pos;
     public:
-        Point2D( T x, T y);
-        Point2D( const Point2D<T>& point);
-        Point2D( const Point2D<T>&& point);
+        Point2D( T x, T y)
+            : x_pos(x), y_pos(y)
+        {}
+        Point2D(const Point2D<T>& point)
+            : x_pos(point.x()), y_pos(point.y())
+        {}
 
         void setX(const T &newXPosition)
         {
-            XPosition = newXPosition;
+            x_pos = newXPosition;
         }
         T x() const
         {
-            return XPosition;
+            return x_pos;
         }
         void setY(const T &newYPosition)
         {
-            YPosition = newYPosition;
+            y_pos = newYPosition;
         }
         T y() const
         {
-            return YPosition;
+            return y_pos;
         }
-        //incX(T value);
+        //xInc(T value);
         //decX(T value);
-        //dx()
 
         //incY(T value);
         //decY(T value);
+
+        //+=x2,y2;
+        //+=Point2D(x2,y2);
+
+
+        //-=x2,y2;
+        //-=Point2D(x2,y2);
 };
 
 #endif // POINT2D_H

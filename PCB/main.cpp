@@ -1,43 +1,27 @@
-#include <CNC.h>
-#include <Delay.h>
-using namespace CNC;
-#define d 1
-#define times 800
-void f (){
-    XStep::setHigh();
-    YStep::setHigh();
-    ZStep::setHigh();
-    delayMs(d);
-
-    XStep::setLow();
-    YStep::setLow();
-    ZStep::setLow();
-    delayMs(d);
-}
+#define F_CPU 16000000UL
+#include <Tool.h>
 int main()
 {
-    XDir::setMode(PinMode::OUTPUT);
-    YDir::setMode(PinMode::OUTPUT);
-    ZDir::setMode(PinMode::OUTPUT);
-
-    XStep::setMode(PinMode::OUTPUT);
-    YStep::setMode(PinMode::OUTPUT);
-    ZStep::setMode(PinMode::OUTPUT);
-
+    auto tool = Tool();
     while(1){
-        XDir::setHigh();
-        YDir::setHigh();
-        ZDir::setHigh();
-        for(uint16_t i = 0;i!=times;++i){
-            f();
-        }
-        delayMs(100);
-        XDir::setLow();
-        YDir::setLow();
-        ZDir::setLow();
-        for(uint16_t i = 0;i!=times;++i){
-            f();
-        }
+        tool.place.up(500);
+        // place.up(10);//-50.0mm
+        delayMs(1000);//wait
+
+        tool.place.down(500);//+50.0mm
+        delayMs(1000);//wait
+
+        tool.right(500);//+50.0mm
+        delayMs(1000);//wait
+
+        tool.left(500);//-50.0mm
+        delayMs(1000);//wait
+
+        tool.up(500);
+        delayMs(1000);//wait
+
+        tool.down(500);
+        delayMs(1000);//wait
     }
     return 0;
 }
