@@ -27,7 +27,9 @@ enum class ParityMode{
     Even,
     Odd
 };
-using namespace Atmega328p::Bits;
+using Utils::Templates::enable_if_t;
+using Utils::Templates::is_numeric_v;
+using Utils::Templates::is_same_v;
 class UART : Base{
     struct SettingInterface{
         static inline void enableDoubleSpeed(){
@@ -99,7 +101,7 @@ class UART : Base{
         }
     };
     struct ActionInterface{
-        static inline void print(char* string){
+        static inline void print(const char* string){
             for(int i=0;string[i]!='\0';++i)
                 print(string[i]);
         }
@@ -107,22 +109,16 @@ class UART : Base{
             while (!(reference(Registers::R_UCSR0A) & (1 << UDRE0)));
             reference(Registers::R_UDR0)=c;
         }
-        static inline void print(unsigned int number){
+        template<class T , class U = enable_if_t<(is_numeric_v<T>)>>
+        static inline void print(T number){
             if(number == 0)
                 print('0');
             char result[Utils::Conversions::digits(number)+1];
             Utils::Conversions::toString(number,result);
             print(result);
         }
-        static inline void println(char* string=""){
-            print(string);
-            print('\n');
-        }
-        static inline void println(unsigned int number){
-            print(number);
-            print('\n');
-        }
-        static inline void println(char c){
+        template< class T, class U = enable_if_t<(is_numeric_v<T> || is_same_v<T,const char*>)> >
+        static inline void println(T c){
             print(c);
             print('\n');
         }

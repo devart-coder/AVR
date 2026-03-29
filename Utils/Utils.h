@@ -26,13 +26,13 @@ namespace Utils{
     };
 
     namespace Conversions {
-        unsigned int digits(unsigned int number){
+        unsigned int digits(uint32_t number){
             int i=0;
             for(; number!=0; ++i)
                 number/=10;
             return i;
         }
-        void toString(unsigned int number, char* buffer){
+        void toString(uint32_t number, char* buffer){
             auto d = digits(number);
             buffer[d--]='\0';
             for(; number!=0; --d){
@@ -116,6 +116,37 @@ namespace Utils{
         };
         template<uint8_t number, bool value>
         inline constexpr uint8_t return_if_v = return_if<number, value>::value;
+
+        template<class T>
+        struct is_numeric{
+            static constexpr bool value = false;
+        };
+        template<>
+        struct is_numeric<uint32_t>{
+            static constexpr bool value = true;
+        };
+        template<>
+        struct is_numeric<int32_t>{
+            static constexpr bool value = true;
+        };
+        template<>
+        struct is_numeric<uint16_t>{
+            static constexpr bool value = true;
+        };
+        template<>
+        struct is_numeric<int16_t>{
+            static constexpr bool value = true;
+        };
+        template<>
+        struct is_numeric<uint8_t>{
+            static constexpr bool value = true;
+        };
+        template<>
+        struct is_numeric<int8_t>{
+            static constexpr bool value = true;
+        };
+        template<class T>
+        inline constexpr bool is_numeric_v = is_numeric<T>::value;
     }
 }
 #endif // UTILS_H
