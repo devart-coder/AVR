@@ -1,39 +1,34 @@
 #ifndef POINT2D_H
 #define POINT2D_H
 #include <inttypes.h>
+#include <PositionInterface.h>
 template< class T = uint32_t>
 class Point2D
 {
     private:
-        T XPosition;
-        T YPosition;
+    using Position = PositionInterface<T>;
+        Position x_pos;
+        Position y_pos;
     public:
-        Point2D( T x, T y);
-        Point2D( const Point2D<T>& point);
-        Point2D( const Point2D<T>&& point);
 
-        void setX(const T &newXPosition)
-        {
-            XPosition = newXPosition;
+        Point2D( T x, T y)
+            : x_pos(Position(x)), y_pos(Position(y))
+        {}
+        Point2D(const Point2D<T>& point)
+            : x_pos(Position(point.x())), y_pos(Position(point.y()))
+        {}
+        Position& x(){
+            return x_pos;
         }
-        T x() const
-        {
-            return XPosition;
+        Position& x() const {
+            return x_pos;
         }
-        void setY(const T &newYPosition)
-        {
-            YPosition = newYPosition;
+        Position& y(){
+            return y_pos;
         }
-        T y() const
-        {
-            return YPosition;
+        Position& y() const{
+            return y_pos;
         }
-        //incX(T value);
-        //decX(T value);
-        //dx()
-
-        //incY(T value);
-        //decY(T value);
 };
 
 #endif // POINT2D_H

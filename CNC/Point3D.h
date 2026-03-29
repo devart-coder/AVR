@@ -4,12 +4,27 @@
 template<class T = uint32_t>
 class Point3D : public Point2D<T>
 {
-    T zPosition;
+    using Position = PositionInterface<T>;
+    Position z_pos;
 public:
-    Point3D(T x, T y, T z);
-    Point3D(const Point2D& point2D, T z);
-    Point3D(const Point3D& point3D);
-    Point3D(const Point3D&& point3D);
+    Position& z(){
+        return z_pos;
+    }
+    Position& z() const {
+        return z_pos;
+    }
+    Point3D(T x=0, T y=0, T z=0)
+        :Point2D<T>(x,y),z_pos(Position(z))
+    { }
+    Point3D(const Point2D<T>& point2D, T z)
+        :Point2D<T>(point2D), z_pos(Position(z))
+    { }
+    Point3D(const Point3D<T>& point3D)
+    {
+        this->x().set(point3D.x().get());
+        this->y().set(point3D.y().get());
+        this->z().set(point3D.z().get());
+    }
 };
 
 #endif // POINT3D_H

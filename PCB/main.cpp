@@ -1,43 +1,30 @@
-#include <CNC.h>
+#define F_CPU 16000000UL
+#include <Tool.h>
+// #include <Point3D.h>
+#include <UART.h>
 #include <Delay.h>
-using namespace CNC;
-#define d 1
-#define times 500
-void f (){
-    XStep::setHigh();
-    YStep::setHigh();
-    ZStep::setHigh();
-    delayMs(d);
-
-    XStep::setLow();
-    YStep::setLow();
-    ZStep::setLow();
-    delayMs(d);
-}
 int main()
 {
-    XDir::setMode(PinMode::OUTPUT);
-    YDir::setMode(PinMode::OUTPUT);
-    ZDir::setMode(PinMode::OUTPUT);
+    auto tool = Tool<MicroStep::_default,uint8_t>();
+    System.out.println("Start");
+        System.out.print("X: ");
+        System.out.print(tool.position().x().get());
+        System.out.print(" Y: ");
+        System.out.print(tool.position().y().get());
+        System.out.print(" Z: ");
+        System.out.println(tool.position().z().get());
+    for(uint8_t i=0;i!=10;++i){
+        System.out.println("New Positions: ");
 
-    XStep::setMode(PinMode::OUTPUT);
-    YStep::setMode(PinMode::OUTPUT);
-    ZStep::setMode(PinMode::OUTPUT);
+        System.out.print("X: ");
+        System.out.print(tool.position().x().inc());
+        System.out.print(" Y: ");
+        System.out.print(tool.position().y().dec());
+        System.out.print(" Z: ");
+        System.out.println(tool.position().z().get());
 
-    while(1){
-        XDir::setHigh();
-        YDir::setHigh();
-        ZDir::setHigh();
-        for(uint16_t i = 0;i!=times;++i){
-            f();
-        }
-        delayMs(100);
-        XDir::setLow();
-        YDir::setLow();
-        ZDir::setLow();
-        for(uint16_t i = 0;i!=times;++i){
-            f();
-        }
+        delayMs(1000);
+
     }
     return 0;
 }
