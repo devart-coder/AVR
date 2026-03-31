@@ -20,13 +20,13 @@ class Point2D
         Position& x(){
             return x_pos;
         }
-        Position& x() const {
+        Position x() const {
             return x_pos;
         }
         Position& y(){
             return y_pos;
         }
-        Position& y() const{
+        Position y() const{
             return y_pos;
         }
 };

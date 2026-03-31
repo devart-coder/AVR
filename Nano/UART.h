@@ -30,6 +30,7 @@ enum class ParityMode{
 using Utils::Templates::enable_if_t;
 using Utils::Templates::is_numeric_v;
 using Utils::Templates::is_same_v;
+using namespace Atmega328p::Bits;
 class UART : Base{
     struct SettingInterface{
         static inline void enableDoubleSpeed(){

@@ -2,53 +2,126 @@
 #define TOOL_H
 #include <Place.h>
 #include <Point3D.h>
-
-template <MicroStep SIZE = _default, class T = uint32_t>
+#include <Utils.h>
+#include <UART.h>
+#include <stdlib.h>
+using Utils::Templates::is_numeric_v;
+using Utils::Templates::enable_if_t;
+template <MicroStep SIZE = _default, class T = uint32_t, class U = enable_if_t<(is_numeric_v<T>)>>
 class Tool{
         static constexpr uint16_t size = static_cast<uint16_t>(SIZE);
-        Place<SIZE,T> _place = Place<SIZE,T>();
+        Place<SIZE,T> _place;
         Point3D<T> point;
+        void move(T x, T y){
+            T dx = x - point.x().get();
+            T dy = y - point.y().get();
+            if(dx==1)
+                right();
+            else if(dx == -1)
+                left();
+            if(dy==1)
+                place().up();
+            else if(dy == -1)
+                place().down();
+        }
     public:
         explicit Tool(T x=0, T y=0, T z=0)
-            :point(Point3D(x,y,z))
+            :point(Point3D(x,y,z)), _place(Place<SIZE,T>(point.y()))
         { }
         explicit Tool(const Point2D<T>& point2D, T z=0)
-            :point(Point3D(point2D,z))
+            :Tool(point2D.x().get(), point2D.y().get(),z)
         { }
         explicit Tool(const Point3D<T>& point3D)
-            : point(Point3D(point3D))
+            : Tool(point3D.x().get(), point3D.y().get(), point3D.z().get())
         { }
 
         Place<SIZE,T>& place(){
             return _place;
         }
-        void left(uint32_t value)
+        void left(T value=1)
         {
             Movement::x.left();
             Movement::x.steps(value*size);
+            point.x().dec(value);
         }
-        void right(uint32_t value){
+        void right(T value=1){
             Movement::x.right();
             Movement::x.steps(value*size);
+            point.x().inc(value);
         }
-        void up(T value){
+        void up(T value=1){
             Movement::z.up();
             Movement::z.steps(value*size);
+            point.z().inc(value);
         }
-        void down(T value){
+        void down(T value=1){
             Movement::z.down();
             Movement::z.steps(value*size);
+            point.z().dec(value);
         }
         Point3D<T>& position(){
             return point;
         }
-        void move(const Point2D<T>& p){
+        Point3D<T> position() const {
+            return point;
+        }
+        void drawLine(const Point2D<T>& p){
 
         }
-        void move(T x, T y){
+        void shift(T x_1, T y_1){//bezenhamAlgorithm
+            auto x_0 = point.x().get();
+            auto y_0 = point.y().get();
 
+            T dx = abs(x_1 - x_0);
+            T dy = abs(y_1 - y_0);
+
+            T dirX = ((x_1 - x_0) > 0) ? 1 : ((x_1 - x_0) == 0) ? 0 : -1;
+            T dirY = ((y_1 - y_0) > 0) ? 1 : ((y_1 - y_0) == 0) ? 0 : -1;
+
+            T error = 0;
+            if(dx >= dy){
+                T derror = dy;
+                for(T x = x_0, y = y_0; x != x_1+dirX; x+=dirX){
+                    move(x,y);
+                    error+=derror;
+                    if(error>=dx){
+                        y+=dirY;
+                        error-=dx;
+                    }
+                }
+            }else{
+                T derror = dx;
+                for(T x = x_0, y = y_0; y != y_1+dirY; y+=dirY){
+                    move(x,y);
+                    error+=derror;
+                    if(error>=dy){
+                        x+=dirX;
+                        error-=dy;
+                    }
+                }
+            }
+        }
+        void shift(T x_1, T y_1, T z_1 ){
+            T dz = z_1 - point.z().get();
+            if(dz>0)
+                up(z_1);
+            else if(dz<0)
+                down(z_1);
+            shift(x_1, y_1);
         }
         //Gcommand();
+        void print(){
+            System.out.print("X: ");
+            System.out.print(point.x().get());
+            System.out.print(" Y: ");
+            System.out.print(point.y().get());
+            System.out.print(" Z: ");
+            System.out.println(point.z().get());
+        }
+        void home(){
+            shift(point.x().get(),0);
+            shift(0,0);
+        }
 };
 
 #endif // TOOL_H

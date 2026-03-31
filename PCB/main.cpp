@@ -1,30 +1,21 @@
 #define F_CPU 16000000UL
 #include <Tool.h>
-// #include <Point3D.h>
-#include <UART.h>
 #include <Delay.h>
 int main()
 {
-    auto tool = Tool<MicroStep::_default,uint8_t>();
+    auto tool = Tool<MicroStep::_default,int32_t>();
     System.out.println("Start");
-        System.out.print("X: ");
-        System.out.print(tool.position().x().get());
-        System.out.print(" Y: ");
-        System.out.print(tool.position().y().get());
-        System.out.print(" Z: ");
-        System.out.println(tool.position().z().get());
-    for(uint8_t i=0;i!=10;++i){
-        System.out.println("New Positions: ");
-
-        System.out.print("X: ");
-        System.out.print(tool.position().x().inc());
-        System.out.print(" Y: ");
-        System.out.print(tool.position().y().dec());
-        System.out.print(" Z: ");
-        System.out.println(tool.position().z().get());
-
-        delayMs(1000);
-
+    tool.print();
+    tool.down(50);
+    for(uint32_t i=1;i!=6;++i){
+        tool.shift(i*200,(i%2) ? 200 : 0);
+        tool.print();
     }
+    tool.up(50);
+    for(uint32_t i=4;i!=-1; --i){
+        tool.shift(i*200, (i%2) ? 200 : 0);
+        tool.print();
+    }
+        System.out.println("Stop");
     return 0;
 }
