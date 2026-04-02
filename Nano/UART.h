@@ -31,6 +31,7 @@ using Utils::Templates::enable_if_t;
 using Utils::Templates::is_numeric_v;
 using Utils::Templates::is_same_v;
 using namespace Atmega328p::Bits;
+
 class UART : Base{
     struct SettingInterface{
         static inline void enableDoubleSpeed(){
@@ -101,9 +102,20 @@ class UART : Base{
             sei();
         }
     };
-    struct ActionInterface{
+    struct OutStreamInterface{
         static inline void print(const char* string){
-            for(int i=0;string[i]!='\0';++i)
+            for(uint32_t i=0;string[i]!='\0';++i)
+                print(string[i]);
+        }
+        static inline void print(char* string, uint32_t size){
+            for(uint32_t i=0; i<=size; ++i)
+                print(string[i]);
+        }
+        static inline void print(char* string, uint32_t ib, uint32_t ie){
+            println((ie-ib>0 ? ie-ib : ib-ie));
+            println(ib);
+            println(ie);
+            for(uint32_t i=ib; i!=ie; ++i, ib%= (ie-ib>0 ? ie-ib : ib-ie))
                 print(string[i]);
         }
         static inline void print(char c){
@@ -118,11 +130,17 @@ class UART : Base{
             Utils::Conversions::toString(number,result);
             print(result);
         }
-        template< class T, class U = enable_if_t<(is_numeric_v<T> || is_same_v<T,const char*>)> >
+        template< class T, class U = enable_if_t<(is_numeric_v<T> || is_same_v<T,const char*>||is_same_v<T,char>)> >
         static inline void println(T c){
             print(c);
             print('\n');
         }
+        static inline void println(char* c, uint32_t size){
+            print(c,size);
+            print('\n');
+        }
+    };
+    struct InStreamInterface{
         static inline unsigned char receive(){
             while (!(reference(Registers::R_UCSR0A) & (1 << RXC0)));
             return reference(Registers::R_UDR0);
@@ -161,14 +179,14 @@ class UART : Base{
         using Setting = SettingInterface;
         using Callback = CallbackInterface;
         using Interrupt = InterruptInterface;
-        static inline ActionInterface out = ActionInterface();
+        static inline OutStreamInterface out = OutStreamInterface();
+        static inline InStreamInterface in = InStreamInterface();
         UART(){
             Setting::defaultSettings();
         }
 
 };
 static inline UART System = UART();
-
 ISR(USART_RX_vect) {
     UART::Callback::receiveHandle();
 }

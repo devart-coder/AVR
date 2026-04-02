@@ -7,11 +7,14 @@
 #include <stdlib.h>
 using Utils::Templates::is_numeric_v;
 using Utils::Templates::enable_if_t;
-template <MicroStep SIZE = _default, class T = uint32_t, class U = enable_if_t<(is_numeric_v<T>)>>
+template <MicroStep MS = _default, class T = int32_t, class U = enable_if_t<(is_numeric_v<T>)>>
 class Tool{
-        static constexpr uint16_t size = static_cast<uint16_t>(SIZE);
-        Place<SIZE,T> _place;
+        static constexpr uint16_t microStep = static_cast<uint16_t>(MS);
+
+        Place<MS,T> _place;
         Point3D<T> point;
+        using Graver = Nano::PinD13;
+    private://Methods
         void move(T x, T y){
             T dx = x - point.x().get();
             T dy = y - point.y().get();
@@ -24,18 +27,30 @@ class Tool{
             else if(dy == -1)
                 place().down();
         }
+        static constexpr inline uint32_t size = 32;
     public:
+        static inline uint32_t head = 0;
+        static inline uint32_t tail = 0;
+        static inline char buffer[size];
         explicit Tool(T x=0, T y=0, T z=0)
-            :point(Point3D(x,y,z)), _place(Place<SIZE,T>(point.y()))
-        { }
+            :point(Point3D(x,y,z)), _place(Place<MS,T>(point.y()))
+        {
+            Graver::setMode(PinMode::OUTPUT);
+            UART::Callback::setReceiveCallback([](){
+                auto symbol = System.in.receive();
+                buffer[tail++]=symbol;
+                //Like '%=', but faster
+                tail&=(size-1);
+            });
+        }
         explicit Tool(const Point2D<T>& point2D, T z=0)
-            :Tool(point2D.x().get(), point2D.y().get(),z)
+            :Tool(point2D.x().get(), point2D.y().get(), z)
         { }
         explicit Tool(const Point3D<T>& point3D)
             : Tool(point3D.x().get(), point3D.y().get(), point3D.z().get())
         { }
 
-        Place<SIZE,T>& place(){
+        Place<MS,T>& place(){
             return _place;
         }
         void left(T value=1)
@@ -111,17 +126,65 @@ class Tool{
         }
         //Gcommand();
         void print(){
+
             System.out.print("X: ");
-            System.out.print(point.x().get());
+            if constexpr (microStep == MicroStep::_0_01mm_){
+                auto x = point.x().get();
+                System.out.print(x/100);
+                System.out.print(".");
+                System.out.print(x%100);
+            }
             System.out.print(" Y: ");
-            System.out.print(point.y().get());
+            if constexpr (microStep == MicroStep::_0_01mm_){
+                auto y = point.y().get();
+                System.out.print(y/100);
+                System.out.print(".");
+                System.out.print(y%100);
+            }
             System.out.print(" Z: ");
-            System.out.println(point.z().get());
+            if constexpr (microStep == MicroStep::_0_01mm_){
+                auto z = point.z().get();
+                System.out.print(z/100);
+                System.out.print(".");
+                System.out.println(z%100);
+            }
         }
         void home(){
-            shift(point.x().get(),0);
-            shift(0,0);
+            shift(0,0,0);
         }
+        void enable(){
+            Graver::setHigh();
+        }
+        void disable(){
+            Graver::setLow();
+        }
+
+        void drawLine(T x_0, T y_0, T x_1, T y_1){
+            // shift();
+        }
+        void drawLine(const Point2D<T>& begin, const Point2D<T>& end){
+            drawLine(begin.x().get(), begin.y().get(), end.x().get(), end.y().get());
+        }
+        void drawCircle(T x_0, T y_0, T radius){
+            int x = 0;
+            int y = 0;
+            int err = 2 - 2 * radius; // Начальная ошибка
+
+            do {
+                // 1. Команда шпинделю: ехать в точку (x0 + x, y0 + y)
+                shift(x_0 + x, y_0 + y);
+
+                int e2 = err;
+                if (e2 <= y)
+                    err += (++y) * 2 + 1;
+                if (e2 > x || err > y)
+                    err += (++x) * 2 + 1;
+            } while (x <= 0); // Проход половины или четверти (настраивается условием)
+        }
+        void drawCircle(const Point2D<T>& center, T radius){
+            drawCircle(center.x().get(), center.y.get(), radius);
+        }
+
 };
 
 #endif // TOOL_H
