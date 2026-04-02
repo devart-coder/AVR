@@ -14,6 +14,7 @@ add_library(CNC STATIC
   Point3D.h Point3D.cpp
   Movement.h
   PositionInterface.h
+  GCListener.h
 
 )
 
