@@ -14,10 +14,11 @@ add_library(Utils STATIC
   Callable.h
   Base.h
   Base.cpp
-  Callable.cpp
+  # Callable.cpp
   Pin.cpp
   GetType.h
-  String.h String.cpp
+  Buffer.h
+  # Buffer.cpp
 )
 
 target_include_directories(Utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

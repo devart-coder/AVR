@@ -4,6 +4,9 @@
 #include <Base.h>
 #include <Utils.h>
 #include <avr/interrupt.h>
+#include <Buffer.h>
+template <class T , T CAP>
+class Buffer;
 enum class BaudRate:unsigned long{
     _300=300,
     _1200=1200,
@@ -109,9 +112,17 @@ class UART : Base{
             for(uint32_t i=0;string[i]!='\0';++i)
                 print(string[i]);
         }
+        static inline void print(bool value){
+            print(value==true? "true" : "false");
+        }
         static inline void print(char* string, uint32_t size){
             for(uint32_t i=0; i<=size; ++i)
                 print(string[i]);
+        }
+        template<class T>
+        static inline void print(const Buffer<T,CAP>& buffer){
+            for(auto i = buffer.begin(); i!=buffer.end(); ++i)
+                print(buffer.at(i));
         }
         static inline void print(char* string, uint32_t ib, uint32_t ie){
             for(uint32_t i=ib; i!=ie; ++i, ib%= (ie-ib>0 ? ie-ib : ib-ie))
@@ -131,6 +142,16 @@ class UART : Base{
         }
         template< class T, class U = enable_if_t<(is_numeric_v<T>||is_same_v<T,const char*>||is_same_v<T,char>)> >
         static inline void println(T c){
+            print(c);
+            print('\n');
+        }
+        template<class T>
+        static inline void println(const Buffer<T,CAP>& c){
+            print(c);
+            print('\n');
+        }
+        template<class T>
+        static inline void println(bool c){
             print(c);
             print('\n');
         }
