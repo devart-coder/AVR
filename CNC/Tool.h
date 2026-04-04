@@ -10,7 +10,6 @@ using Utils::Templates::enable_if_t;
 template <MicroStep MS = _default, class T = int32_t, class U = enable_if_t<(is_numeric_v<T>)>>
 class Tool{
         static constexpr uint16_t microStep = static_cast<uint16_t>(MS);
-
         Place<MS,T> _place;
         Point3D<T> point;
         using Graver = Nano::PinD13;
@@ -27,21 +26,11 @@ class Tool{
             else if(dy == -1)
                 place().down();
         }
-        static constexpr inline uint32_t size = 32;
     public:
-        static inline uint32_t head = 0;
-        static inline uint32_t tail = 0;
-        static inline char buffer[size];
         explicit Tool(T x=0, T y=0, T z=0)
             :point(Point3D(x,y,z)), _place(Place<MS,T>(point.y()))
         {
             Graver::setMode(PinMode::OUTPUT);
-            UART::Callback::setReceiveCallback([](){
-                auto symbol = System.in.receive();
-                buffer[tail++]=symbol;
-                //Like '%=', but faster
-                tail&=(size-1);
-            });
         }
         explicit Tool(const Point2D<T>& point2D, T z=0)
             :Tool(point2D.x().get(), point2D.y().get(), z)
@@ -49,29 +38,28 @@ class Tool{
         explicit Tool(const Point3D<T>& point3D)
             : Tool(point3D.x().get(), point3D.y().get(), point3D.z().get())
         { }
-
         Place<MS,T>& place(){
             return _place;
         }
         void left(T value=1)
         {
             Movement::x.left();
-            Movement::x.steps(value*size);
+            Movement::x.steps(value*microStep);
             point.x().dec(value);
         }
         void right(T value=1){
             Movement::x.right();
-            Movement::x.steps(value*size);
+            Movement::x.steps(value*microStep);
             point.x().inc(value);
         }
         void up(T value=1){
             Movement::z.up();
-            Movement::z.steps(value*size);
+            Movement::z.steps(value*microStep);
             point.z().inc(value);
         }
         void down(T value=1){
             Movement::z.down();
-            Movement::z.steps(value*size);
+            Movement::z.steps(value*microStep);
             point.z().dec(value);
         }
         Point3D<T>& position(){

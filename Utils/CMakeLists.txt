@@ -17,6 +17,7 @@ add_library(Utils STATIC
   Callable.cpp
   Pin.cpp
   GetType.h
+  String.h String.cpp
 )
 
 target_include_directories(Utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
