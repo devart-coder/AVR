@@ -3,16 +3,16 @@
 
 #include <inttypes.h>
 #include <UART.h>
-template<class T=uint16_t, T CAP=64>
+template<class T=uint16_t, T CAP=32>
 class Buffer
 {
     char _string[CAP];
+    static constexpr T _capacity = CAP;
     T _begin = 0;
     T _end = 0;
 public:
     Buffer(const char* s)
     {
-        // _string = s;
         for(T i=0; s[i]!='\0'; ++i){
             _string[i]=s[i];
             ++_end;
@@ -46,10 +46,7 @@ public:
         return -1;
     }
     inline bool isEmpty(){
-        for(T i = begin; i!= _end; ++i)
-            if(_string[i]!=' ')
-                return false;
-        return true;
+        return _begin == _end ? true : false;
     }
     inline bool startWith(const char* s){
         for(T i=0; s[i]!='\0'; ++i)
@@ -59,17 +56,34 @@ public:
     }
     //trimm();
     //endWith();
-    //find('');
-    //replace('');
-    //repaceIf('');
-    //capacity();
+    inline bool replace(char oldChar, char newChar){
+        return replaceIf([&oldChar](char c){return c == oldChar;}, newChar);
+    }
+    template<class Predicate>
+    inline bool replaceIf( Predicate func, char newChar){//O(N)
+        bool replacedFlag = false;
+        for(T i = _begin; i!=_end; ++i){
+            if(func(_string[i])){
+                _string[i] = newChar;
+                replacedFlag = true;
+            }
+        }
+        return replacedFlag;
+    }
+    inline T capacity(){
+        return _capacity;
+    }
     //split('');
-    //set(number, char);
-    //append();
-    //operator+=;
-    //
-    inline char* get()const{
-        return _string;
+    inline bool set(T index, char newChar){
+        auto oldChar = at(index);
+        if(oldChar != -1){
+            _string[index] = newChar;
+            return true;
+        }
+        return false;
+    }
+    inline bool append(const char* newString){
+
     }
 };
 

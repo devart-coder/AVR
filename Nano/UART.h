@@ -119,8 +119,8 @@ class UART : Base{
             for(uint32_t i=0; i<=size; ++i)
                 print(string[i]);
         }
-        template<class T>
-        static inline void print(const Buffer<T,CAP>& buffer){
+        template<class T, T C>
+        static inline void print(const Buffer<T,C>& buffer){
             for(auto i = buffer.begin(); i!=buffer.end(); ++i)
                 print(buffer.at(i));
         }
