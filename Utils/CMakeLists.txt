@@ -6,14 +6,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(Utils STATIC
-  Utils.cpp
+  # Utils.cpp
   Utils.h
   Pin.h
   Port.h
   Bus.h
   Callable.h
   Base.h
-  Base.cpp
+  # Base.cpp
   # Callable.cpp
   Pin.cpp
   GetType.h

@@ -5,8 +5,6 @@
 #include <Utils.h>
 #include <avr/interrupt.h>
 #include <Buffer.h>
-template <class T , T CAP>
-class Buffer;
 enum class BaudRate:unsigned long{
     _300=300,
     _1200=1200,
@@ -97,13 +95,13 @@ class UART : Base{
         }
         static inline void defaultSettings(){
             cli();
-            Setting::setBaudRate(BaudRate::_9600);
-            Setting::setPackageBits(PackageBits::_8);
-            Setting::setParityMode(ParityMode::Disabled);
-            Setting::setOneStopBit();
+            SettingInterface::setBaudRate(BaudRate::_9600);
+            SettingInterface::setPackageBits(PackageBits::_8);
+            SettingInterface::setParityMode(ParityMode::Disabled);
+            SettingInterface::setOneStopBit();
 
-            Interrupt::enableTransmissionInterrupt(true);
-            Interrupt::enableReceiveInterrupt(true);
+            InterruptInterface::enableTransmissionInterrupt(true);
+            InterruptInterface::enableReceiveInterrupt(true);
             sei();
         }
     };
@@ -140,8 +138,8 @@ class UART : Base{
             Utils::Conversions::toString(number,result);
             print(result);
         }
-        template< class T, class U = enable_if_t<(is_numeric_v<T>||is_same_v<T,const char*>||is_same_v<T,char>)> >
-        static inline void println(T c){
+        template< class T , class U = enable_if_t<(is_numeric_v<T>||is_same_v<T,const char*>||is_same_v<T,char>)> >
+        static inline void println(T c ){
             print(c);
             print('\n');
         }
@@ -155,50 +153,17 @@ class UART : Base{
             print(c);
             print('\n');
         }
-        static inline void println(char* c, uint32_t size){
-            print(c, size);
-            print('\n');
-        }
     };
     class InStreamInterface{
-        class BufferInterface{
-            static inline char _buffer[_capacity]={' '};
-            static inline uint16_t begin = 0;
-            static inline uint16_t end = 0;
-            // static inline bool endOfStringFlag = false;
+            Buffer<uint16_t,CAP> _buffer = Buffer<uint16_t,CAP>("");
         public:
-            static inline char* get(){
+            Buffer<uint16_t,CAP>& buffer(){
                 return _buffer;
             }
-            static inline void write(char c){
-                _buffer[end++]=c;
-                end&=(_capacity-1);
+            static inline unsigned char receiveByte(){
+                while (!(reference(Registers::R_UCSR0A) & (1 << RXC0)));
+                return reference(Registers::R_UDR0);
             }
-            static inline uint16_t length(){
-                return end>=begin ? end-begin : (_capacity-begin)+end;
-            }
-            static inline void flush(){
-                auto counter = _capacity;
-                while(counter--)
-                    _buffer[counter]=' ';
-                end=begin=0;
-            }
-            static constexpr inline uint16_t capacity() {
-                return _capacity;
-            }
-        };
-        static inline BufferInterface _buffer;
-        public:
-        InStreamInterface(){
-            _buffer = BufferInterface();
-        }
-        static constexpr BufferInterface buffer(){
-            return _buffer;
-        }
-        static inline unsigned char receiveByte(){
-            while (!(reference(Registers::R_UCSR0A) & (1 << RXC0)));
-            return reference(Registers::R_UDR0);
-        }
     };
     struct CallbackInterface{
         using HandleType = void (*)();
@@ -244,13 +209,14 @@ class UART : Base{
             in = InStreamInterface();
         }
 };
-static inline auto System = UART<64>();
+
+constexpr uint16_t value = 64;
+static inline auto uart = UART<value>();
 ISR(USART_RX_vect) {
-    auto symbol = System.in.receiveByte();
-    System.in.buffer().write(symbol);
-    UART<System.in.buffer().capacity()>::Callback::receiveHandle();
+    uart.in.buffer().append( uart.in.receiveByte() );
+    UART<value>::Callback::receiveHandle();
 }
 ISR(USART_TX_vect) {
-    UART<System.in.buffer().capacity()>::Callback::transmissionHandle();
+    UART<value>::Callback::transmissionHandle();
 }
 #endif // UART_H
