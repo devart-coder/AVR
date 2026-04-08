@@ -6,18 +6,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(Utils STATIC
-  Utils.cpp
+  # Utils.cpp
   Utils.h
   Pin.h
   Port.h
   Bus.h
   Callable.h
   Base.h
-  Base.cpp
-  Callable.cpp
+  # Base.cpp
+  # Callable.cpp
   Pin.cpp
   GetType.h
-  String.h String.cpp
+  Buffer.h
+  # Buffer.cpp
 )
 
 target_include_directories(Utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

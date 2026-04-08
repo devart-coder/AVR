@@ -115,26 +115,26 @@ class Tool{
         //Gcommand();
         void print(){
 
-            System.out.print("X: ");
+            uart.out.print("X: ");
             if constexpr (microStep == MicroStep::_0_01mm_){
                 auto x = point.x().get();
-                System.out.print(x/100);
-                System.out.print(".");
-                System.out.print(x%100);
+                uart.out.print(x/100);
+                uart.out.print(".");
+                uart.out.print(x%100);
             }
-            System.out.print(" Y: ");
+            uart.out.print(" Y: ");
             if constexpr (microStep == MicroStep::_0_01mm_){
                 auto y = point.y().get();
-                System.out.print(y/100);
-                System.out.print(".");
-                System.out.print(y%100);
+                uart.out.print(y/100);
+                uart.out.print(".");
+                uart.out.print(y%100);
             }
-            System.out.print(" Z: ");
+            uart.out.print(" Z: ");
             if constexpr (microStep == MicroStep::_0_01mm_){
                 auto z = point.z().get();
-                System.out.print(z/100);
-                System.out.print(".");
-                System.out.println(z%100);
+                uart.out.print(z/100);
+                uart.out.print(".");
+                uart.out.println(z%100);
             }
         }
         void home(){
