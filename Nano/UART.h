@@ -30,7 +30,11 @@ enum class ParityMode{
 using Utils::Templates::enable_if_t;
 using Utils::Templates::is_numeric_v;
 using Utils::Templates::is_same_v;
+using namespace Atmega328p::Bits;
+template<uint16_t CAP>
 class UART : Base{
+    static constexpr inline uint16_t _capacity = CAP;
+    private:
     struct SettingInterface{
         static inline void enableDoubleSpeed(){
             reference(Registers::R_UCSR0A)|= (1 << U2X0);
@@ -100,9 +104,17 @@ class UART : Base{
             sei();
         }
     };
-    struct ActionInterface{
+    struct OutStreamInterface{
         static inline void print(const char* string){
-            for(int i=0;string[i]!='\0';++i)
+            for(uint32_t i=0;string[i]!='\0';++i)
+                print(string[i]);
+        }
+        static inline void print(char* string, uint32_t size){
+            for(uint32_t i=0; i<=size; ++i)
+                print(string[i]);
+        }
+        static inline void print(char* string, uint32_t ib, uint32_t ie){
+            for(uint32_t i=ib; i!=ie; ++i, ib%= (ie-ib>0 ? ie-ib : ib-ie))
                 print(string[i]);
         }
         static inline void print(char c){
@@ -117,12 +129,52 @@ class UART : Base{
             Utils::Conversions::toString(number,result);
             print(result);
         }
-        template< class T, class U = enable_if_t<(is_numeric_v<T> || is_same_v<T,const char*>)> >
+        template< class T, class U = enable_if_t<(is_numeric_v<T>||is_same_v<T,const char*>||is_same_v<T,char>)> >
         static inline void println(T c){
             print(c);
             print('\n');
         }
-        static inline unsigned char receive(){
+        static inline void println(char* c, uint32_t size){
+            print(c, size);
+            print('\n');
+        }
+    };
+    class InStreamInterface{
+        class BufferInterface{
+            static inline char _buffer[_capacity]={' '};
+            static inline uint16_t begin = 0;
+            static inline uint16_t end = 0;
+            // static inline bool endOfStringFlag = false;
+        public:
+            static inline char* get(){
+                return _buffer;
+            }
+            static inline void write(char c){
+                _buffer[end++]=c;
+                end&=(_capacity-1);
+            }
+            static inline uint16_t length(){
+                return end>=begin ? end-begin : (_capacity-begin)+end;
+            }
+            static inline void flush(){
+                auto counter = _capacity;
+                while(counter--)
+                    _buffer[counter]=' ';
+                end=begin=0;
+            }
+            static constexpr inline uint16_t capacity() {
+                return _capacity;
+            }
+        };
+        static inline BufferInterface _buffer;
+        public:
+        InStreamInterface(){
+            _buffer = BufferInterface();
+        }
+        static constexpr BufferInterface buffer(){
+            return _buffer;
+        }
+        static inline unsigned char receiveByte(){
             while (!(reference(Registers::R_UCSR0A) & (1 << RXC0)));
             return reference(Registers::R_UDR0);
         }
@@ -138,10 +190,12 @@ class UART : Base{
             receiveCallBack = handle;
         }
         static void receiveHandle(){
-            receiveCallBack();
+            if(receiveCallBack!=nullptr)
+                receiveCallBack();
         }
         static void transmissionHandle(){
-            transmissionCallBack();
+            if(transmissionCallBack!=nullptr)
+                transmissionCallBack();
         }
     };
     struct InterruptInterface{
@@ -160,18 +214,22 @@ class UART : Base{
         using Setting = SettingInterface;
         using Callback = CallbackInterface;
         using Interrupt = InterruptInterface;
-        static inline ActionInterface out = ActionInterface();
-        UART(){
+        static inline OutStreamInterface out;
+        static inline InStreamInterface in;
+        UART()
+        {
             Setting::defaultSettings();
+            out = OutStreamInterface();
+            in = InStreamInterface();
         }
-
 };
-static inline UART System = UART();
-
+static inline auto System = UART<64>();
 ISR(USART_RX_vect) {
-    UART::Callback::receiveHandle();
+    auto symbol = System.in.receiveByte();
+    System.in.buffer().write(symbol);
+    UART<System.in.buffer().capacity()>::Callback::receiveHandle();
 }
 ISR(USART_TX_vect) {
-    UART::Callback::transmissionHandle();
+    UART<System.in.buffer().capacity()>::Callback::transmissionHandle();
 }
 #endif // UART_H

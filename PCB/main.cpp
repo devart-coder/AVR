@@ -1,30 +1,39 @@
 #define F_CPU 16000000UL
+#include <Nano.h>
 #include <Tool.h>
-// #include <Point3D.h>
-#include <UART.h>
 #include <Delay.h>
+#include <String.h>
+using namespace Nano;
 int main()
 {
-    auto tool = Tool<MicroStep::_default,uint8_t>();
-    System.out.println("Start");
-        System.out.print("X: ");
-        System.out.print(tool.position().x().get());
-        System.out.print(" Y: ");
-        System.out.print(tool.position().y().get());
-        System.out.print(" Z: ");
-        System.out.println(tool.position().z().get());
-    for(uint8_t i=0;i!=10;++i){
-        System.out.println("New Positions: ");
-
-        System.out.print("X: ");
-        System.out.print(tool.position().x().inc());
-        System.out.print(" Y: ");
-        System.out.print(tool.position().y().dec());
-        System.out.print(" Z: ");
-        System.out.println(tool.position().z().get());
+    auto tool = Tool();
+    while(1){
+        // auto cap = System.in.buffer().capacity();
+        // auto l = System.in.buffer().length();
+        // auto b = System.in.buffer().get();
+        // System.out.print("Cap: ");
+        // System.out.print(cap);
+        // System.out.print(" Len: ");
+        // System.out.print(l);
+        // System.out.print(" ");
+        // System.out.println(b, l);
+        // if(b == "Hello"){
+        //     PinD13::isHigh();
+        // }
+        // System.out.println(s2.get());
+        // {
+            // s2 = String("Hello");
+        // }
+        // System.out.print(s.get());
+        // System.out.println(s2.get());
+        char b[] = {'1','2','3','4'};
+        auto b1 = Buffer(b);
+        auto b2 = Buffer("Hello World!");
+        // System.out.print("B1");
+        System.out.print(b2.get(),3);
+        System.out.println(b1.get(),3);
 
         delayMs(1000);
-
     }
     return 0;
 }
