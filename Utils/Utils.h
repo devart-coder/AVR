@@ -21,9 +21,6 @@ namespace Utils{
             return reference(REG);
         }
     };
-    template<Registers REG>
-    struct BitsAction : Base{
-    };
 
     namespace Conversions {
         unsigned int digits(uint32_t number){
@@ -39,6 +36,14 @@ namespace Utils{
                 buffer[d]=number%10+'0';
                 number/=10;
             }
+        }
+        uint32_t toDigital(const char * s){
+            uint32_t i = 1, res = 0;
+            for(auto j=0; s[j]!='\0'; ++j, i*=10);
+            i/=10;
+            for(auto j=0; s[j]!='\0'; ++j, i/=10)
+                res+=(s[j]-'0')*i;
+            return res;
         }
     }
     namespace Templates {
@@ -58,7 +63,6 @@ namespace Utils{
         template<bool f, class T = void>
         using enable_if_t = typename enable_if<f,T>::type;
 
-        //PinCheck
         template<class T , class = void>
         struct is_pin{
             static constexpr bool value = false;

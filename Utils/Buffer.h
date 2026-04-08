@@ -18,12 +18,7 @@ public:
             ++_end;
         }
     }
-     Buffer(const Buffer<T,CAP>& b)
-        :_begin(0), _end(0)
-    {
-        Nano::PinD13::setMode(PinMode::OUTPUT);
-        Nano::PinD13::setHigh();
-    }
+    Buffer(const Buffer<T,CAP>& b) = delete;
     inline char at(const T index)const{
         if ((index>=_end)||(index<_begin))
             return -1;

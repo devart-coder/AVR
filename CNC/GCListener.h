@@ -16,8 +16,7 @@ class GCListener{
             if(buffer.startWith("G01"))
                 Nano::PinD13::setLow();
         }
-        void execute(){
-
+        void execute(const char* gc){
         }
     public:
         GCListener(const Tool<MicroStep::_default>& t)
